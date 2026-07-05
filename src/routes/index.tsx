@@ -5,79 +5,109 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function HunterIllustration() {
+function HeroVisual() {
   return (
-    <svg
-      viewBox="0 0 400 300"
-      className="mx-auto h-56 w-full max-w-md text-primary"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {/* Moon */}
-      <circle cx="310" cy="70" r="34" strokeOpacity="0.6" />
-      <circle cx="310" cy="70" r="34" fill="currentColor" fillOpacity="0.06" />
-      {/* Distant mountains */}
-      <path d="M0,220 L70,150 L120,200 L180,130 L240,210 L310,160 L400,220" strokeOpacity="0.4" />
-      {/* Ground */}
-      <line x1="0" y1="245" x2="400" y2="245" strokeOpacity="0.5" />
-      {/* Hunter silhouette */}
-      <g transform="translate(140,140)">
-        <circle cx="0" cy="0" r="10" />
-        <path d="M0,10 L0,55" />
-        <path d="M0,20 L-22,45 L-18,55" />
-        <path d="M0,20 L25,10 L48,30" />
-        <path d="M0,55 L-12,105" />
-        <path d="M0,55 L14,105" />
-        {/* Bow */}
-        <path d="M25,10 Q60,25 25,55" strokeOpacity="0.8" />
-        <line x1="25" y1="10" x2="25" y2="55" strokeDasharray="2 2" strokeOpacity="0.6" />
-        <line x1="25" y1="32" x2="72" y2="32" />
-      </g>
-      {/* Monster tracks */}
-      <g strokeOpacity="0.7">
-        <path d="M240,255 q3,-4 6,0 q3,4 6,0" />
-        <path d="M270,262 q3,-4 6,0 q3,4 6,0" />
-        <path d="M300,255 q3,-4 6,0 q3,4 6,0" />
-        <path d="M330,262 q3,-4 6,0 q3,4 6,0" />
-      </g>
-      {/* Monster eyes in the dark */}
-      <g fill="currentColor">
-        <circle cx="370" cy="200" r="2" />
-        <circle cx="378" cy="200" r="2" />
-      </g>
-      {/* Compass mark */}
-      <g transform="translate(60,60)" strokeOpacity="0.5">
-        <circle cx="0" cy="0" r="18" />
-        <polygon points="0,-14 -3,0 0,-2 3,0" fill="currentColor" />
-        <polygon points="0,14 -3,0 0,2 3,0" fillOpacity="0.4" fill="currentColor" />
-      </g>
-    </svg>
+    <div className="relative mx-auto mt-14 h-[280px] w-full max-w-2xl md:h-[340px]">
+      {/* Concentric radar rings */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="animate-float">
+          <svg viewBox="0 0 400 400" className="h-[280px] w-[280px] md:h-[340px] md:w-[340px]">
+            <defs>
+              <radialGradient id="ring-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#ff5b1f" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#ff5b1f" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="200" cy="200" r="180" fill="url(#ring-glow)" />
+            {[40, 80, 120, 160].map((r) => (
+              <circle key={r} cx="200" cy="200" r={r} fill="none" stroke="#24242c" strokeWidth="1" />
+            ))}
+            <line x1="20" y1="200" x2="380" y2="200" stroke="#24242c" />
+            <line x1="200" y1="20" x2="200" y2="380" stroke="#24242c" />
+            {/* Sweep line */}
+            <g style={{ transformOrigin: "200px 200px", animation: "spin 6s linear infinite" }}>
+              <defs>
+                <linearGradient id="sweep" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stopColor="#ff5b1f" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#ff5b1f" stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
+              <path d="M200,200 L380,200 A180,180 0 0,0 340,73 Z" fill="url(#sweep)" opacity="0.35" />
+            </g>
+            {/* Data points */}
+            <circle cx="140" cy="140" r="4" fill="#ff5b1f" />
+            <circle cx="140" cy="140" r="8" fill="none" stroke="#ff5b1f" strokeOpacity="0.4" />
+            <circle cx="270" cy="230" r="3" fill="#ededf0" />
+            <circle cx="230" cy="110" r="3" fill="#ededf0" opacity="0.5" />
+            <circle cx="110" cy="260" r="3" fill="#ededf0" opacity="0.6" />
+            {/* Center */}
+            <circle cx="200" cy="200" r="6" fill="#0a0a0b" stroke="#ff5b1f" strokeWidth="2" />
+          </svg>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+      {/* Floating coordinate chips */}
+      <div className="absolute right-0 top-8 hidden md:block">
+        <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
+          <div className="text-muted-foreground">TARGET_04</div>
+          <div className="text-primary">[+42, -18]</div>
+        </div>
+      </div>
+      <div className="absolute -left-2 bottom-8 hidden md:block">
+        <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
+          <div className="text-muted-foreground">SERVER</div>
+          <div>Ilyzaelle</div>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function Index() {
   return (
     <Layout>
-      <div className="w-full max-w-2xl text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-muted-foreground">
-          Archis Touch
-        </p>
-        <h1 className="mt-4 text-5xl font-medium text-foreground md:text-6xl">
-          Bienvenido a <span className="text-primary italic">Archis Touch</span>
-        </h1>
-        <div className="mx-auto my-10 h-px w-24 bg-primary/60" />
-        <HunterIllustration />
-        <p className="mx-auto mt-6 max-w-md text-muted-foreground">
-          El grimorio del cazador. Sigue el rastro de los archimonstruos que
-          osan cruzar tu camino.
-        </p>
-        <Link to="/join" className="gold-btn mt-10 hover:bg-transparent hover:text-primary">
-          Ingresar
-        </Link>
+      <div className="w-full max-w-3xl">
+        <div className="text-center">
+          <span className="badge-dot">
+            <span className="live-dot" /> Real-time positions
+          </span>
+          <h1 className="mt-6 text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
+            Track every <span className="text-gradient">archimonster</span>
+            <br className="hidden sm:block" /> before it moves.
+          </h1>
+          <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
+            Archis Touch te da coordenadas exactas y en tiempo real de los
+            archimonstruos, directo desde la red de rastreadores.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/join"
+              className="btn-primary hover:[&]:btn-primary-hover"
+            >
+              Ingresar
+              <span aria-hidden>→</span>
+            </Link>
+            <a href="#how" className="btn-ghost hover:border-primary/50 hover:text-primary">
+              Cómo funciona
+            </a>
+          </div>
+        </div>
+
+        <HeroVisual />
+
+        <div id="how" className="mt-16 grid gap-4 md:grid-cols-3">
+          {[
+            { k: "01", t: "Únete", d: "Entra al servidor y obtén tu clave de licencia." },
+            { k: "02", t: "Introduce", d: "Pega la clave en la página del archimonstruo objetivo." },
+            { k: "03", t: "Revela", d: "Recibe posición, servidor y nombre al instante." },
+          ].map((s) => (
+            <div key={s.k} className="surface-card p-5">
+              <div className="mono-label">{s.k}</div>
+              <div className="mt-2 font-display text-lg font-semibold">{s.t}</div>
+              <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </Layout>
   );
