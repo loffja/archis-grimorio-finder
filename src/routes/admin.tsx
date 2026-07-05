@@ -36,22 +36,25 @@ function AdminPage() {
             if (passInput === ADMIN_PASSWORD) setUnlocked(true);
             else setPassError(true);
           }}
-          className="parchment-card w-full max-w-sm p-8 text-center"
+          className="surface-card w-full max-w-sm p-8 text-center"
         >
-          <h1 className="text-3xl text-foreground">Acceso restringido</h1>
-          <div className="mx-auto my-5 h-px w-16 bg-primary/60" />
+          <span className="badge-dot"><span className="live-dot" /> Restricted</span>
+          <h1 className="mt-5 text-3xl font-semibold tracking-tight">Admin access</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Introduce la contraseña para continuar.</p>
           <input
             type="password"
             autoFocus
             value={passInput}
             onChange={(e) => { setPassInput(e.target.value); setPassError(false); }}
-            placeholder="Contraseña"
-            className="w-full border border-border bg-background/60 px-4 py-3 text-center font-mono text-sm text-foreground focus:border-primary"
+            placeholder="••••••••"
+            className="field focus:[&]:field-focus mt-6 text-center"
           />
           {passError && (
             <p className="mt-3 text-sm text-destructive">Contraseña incorrecta.</p>
           )}
-          <button type="submit" className="gold-btn mt-5 w-full">Desbloquear</button>
+          <button type="submit" className="btn-primary mt-5 w-full justify-center hover:[&]:btn-primary-hover">
+            Desbloquear →
+          </button>
         </form>
       </Layout>
     );
@@ -80,11 +83,8 @@ function AdminPanel() {
     try {
       const res = await fetch("https://api.bnotifier.es/licencias");
       const data = await res.json().catch(() => []);
-      if (!res.ok) {
-        setLoadError(`Error ${res.status}`);
-      } else {
-        setLicencias(Array.isArray(data) ? data : data?.licencias ?? []);
-      }
+      if (!res.ok) setLoadError(`Error ${res.status}`);
+      else setLicencias(Array.isArray(data) ? data : data?.licencias ?? []);
     } catch {
       setLoadError("No se pudo cargar la lista.");
     } finally {
@@ -119,47 +119,66 @@ function AdminPanel() {
     }
   }
 
+  const totalUses = licencias.reduce((sum, l) => sum + (Array.isArray(l.usedFor) ? l.usedFor.length : 0), 0);
+
   return (
-    <div className="w-full max-w-5xl space-y-8">
-      <div className="text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">Panel</p>
-        <h1 className="mt-2 text-4xl text-foreground">Administración de licencias</h1>
-        <div className="mx-auto my-5 h-px w-16 bg-primary/60" />
+    <div className="w-full max-w-6xl space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span className="mono-label">Admin panel</span>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight">Licencias</h1>
+        </div>
+        <div className="flex gap-3">
+          <div className="surface-card px-4 py-3">
+            <div className="mono-label">Total</div>
+            <div className="mt-1 font-display text-2xl font-semibold">{licencias.length}</div>
+          </div>
+          <div className="surface-card px-4 py-3">
+            <div className="mono-label">Usos</div>
+            <div className="mt-1 font-display text-2xl font-semibold text-primary">{totalUses}</div>
+          </div>
+        </div>
       </div>
 
-      <section className="parchment-card p-6 md:p-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl text-primary italic">Licencias registradas</h2>
-          <button onClick={loadLicencias} className="font-mono text-xs uppercase tracking-widest text-primary hover:underline">
+      <section className="surface-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 className="font-display text-lg font-semibold">Registered licenses</h2>
+          <button
+            onClick={loadLicencias}
+            className="mono-label transition-colors hover:text-primary"
+          >
             ↻ Recargar
           </button>
         </div>
         {loading ? (
-          <p className="py-8 text-center text-muted-foreground">Cargando…</p>
+          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
         ) : loadError ? (
-          <p className="py-8 text-center text-destructive">{loadError}</p>
+          <p className="py-10 text-center text-destructive">{loadError}</p>
         ) : licencias.length === 0 ? (
-          <p className="py-8 text-center text-muted-foreground">Sin licencias.</p>
+          <p className="py-10 text-center text-muted-foreground">Sin licencias.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-sm">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="py-3 pr-4">PC ID</th>
-                  <th className="py-3 pr-4">Licencia</th>
-                  <th className="py-3 pr-4">Usos</th>
-                  <th className="py-3">Creación</th>
+                <tr className="border-b border-border">
+                  <th className="mono-label px-5 py-3 font-normal">PC ID</th>
+                  <th className="mono-label px-5 py-3 font-normal">Licencia</th>
+                  <th className="mono-label px-5 py-3 font-normal">Usos</th>
+                  <th className="mono-label px-5 py-3 font-normal">Creación</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="font-mono">
                 {licencias.map((l, i) => {
                   const created = l.createdAt || l.created_at;
+                  const uses = Array.isArray(l.usedFor) ? l.usedFor.length : 0;
                   return (
-                    <tr key={i} className="border-b border-border/50 last:border-0">
-                      <td className="py-3 pr-4 text-foreground">{l.pc_id}</td>
-                      <td className="py-3 pr-4 text-primary">{l.licencia}</td>
-                      <td className="py-3 pr-4 text-foreground">{Array.isArray(l.usedFor) ? l.usedFor.length : 0}</td>
-                      <td className="py-3 text-muted-foreground">
+                    <tr key={i} className="border-b border-border/60 last:border-0 hover:bg-surface-2/50">
+                      <td className="px-5 py-3.5">{l.pc_id}</td>
+                      <td className="px-5 py-3.5 text-primary">{l.licencia}</td>
+                      <td className="px-5 py-3.5">
+                        <span className="badge-dot">{uses}</span>
+                      </td>
+                      <td className="px-5 py-3.5 text-muted-foreground">
                         {created ? new Date(created).toLocaleString() : "—"}
                       </td>
                     </tr>
@@ -171,44 +190,46 @@ function AdminPanel() {
         )}
       </section>
 
-      <section className="parchment-card p-6 md:p-8">
-        <h2 className="mb-5 text-2xl italic text-primary">Registrar nueva licencia</h2>
+      <section className="surface-card p-6 md:p-8">
+        <h2 className="font-display text-lg font-semibold">Registrar nueva licencia</h2>
         {feedback && (
           <div
             className={
-              "mb-5 border px-4 py-3 text-sm " +
+              "mt-5 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm " +
               (feedback.type === "ok"
-                ? "border-primary/60 bg-primary/10 text-foreground"
-                : "border-destructive/60 bg-destructive/15 text-foreground")
+                ? "border-[color:var(--success)]/40 bg-[color:var(--success)]/10"
+                : "border-destructive/40 bg-destructive/10")
             }
+            style={feedback.type === "ok" ? { color: "var(--success)" } : undefined}
           >
-            {feedback.text}
+            <span
+              className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+              style={{ background: feedback.type === "ok" ? "var(--success)" : "var(--destructive)" }}
+            />
+            <span className={feedback.type === "err" ? "text-foreground" : ""}>{feedback.text}</span>
           </div>
         )}
-        <form onSubmit={onRegister} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <form onSubmit={onRegister} className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr_auto]">
           <div>
-            <label htmlFor="pcid" className="mb-1 block font-mono text-xs uppercase tracking-wider text-muted-foreground">PC ID</label>
+            <label htmlFor="pcid" className="mono-label mb-2 block">PC ID</label>
             <input
-              id="pcid"
-              required
-              value={pcId}
-              onChange={(e) => setPcId(e.target.value)}
-              className="w-full border border-border bg-background/60 px-3 py-2 font-mono text-sm text-foreground focus:border-primary"
+              id="pcid" required value={pcId} onChange={(e) => setPcId(e.target.value)}
+              className="field focus:[&]:field-focus"
             />
           </div>
           <div>
-            <label htmlFor="newlic" className="mb-1 block font-mono text-xs uppercase tracking-wider text-muted-foreground">Nueva licencia</label>
+            <label htmlFor="newlic" className="mono-label mb-2 block">Nueva licencia</label>
             <input
-              id="newlic"
-              required
-              value={newLic}
-              onChange={(e) => setNewLic(e.target.value)}
-              className="w-full border border-border bg-background/60 px-3 py-2 font-mono text-sm text-foreground focus:border-primary"
+              id="newlic" required value={newLic} onChange={(e) => setNewLic(e.target.value)}
+              className="field focus:[&]:field-focus"
             />
           </div>
           <div className="flex items-end">
-            <button type="submit" disabled={submitting} className="gold-btn w-full md:w-auto disabled:opacity-50">
-              {submitting ? "Registrando…" : "Registrar"}
+            <button
+              type="submit" disabled={submitting}
+              className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:opacity-50 md:w-auto"
+            >
+              {submitting ? "…" : "Registrar →"}
             </button>
           </div>
         </form>

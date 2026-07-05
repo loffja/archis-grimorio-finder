@@ -6,7 +6,6 @@ export const Route = createFileRoute("/position/$id")({
   head: () => ({
     meta: [
       { title: "Revela la posición — Archis Touch" },
-      { name: "description", content: "Revela la posición del archimonstruo con tu clave de licencia." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -52,56 +51,60 @@ function PositionPage() {
 
   return (
     <Layout>
-      <div className="w-full max-w-xl">
-        <p className="text-center font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          Archimonstruo #{id}
-        </p>
-        <h1 className="mt-3 text-center text-4xl text-foreground md:text-5xl">
-          Revela la <span className="italic text-primary">posición</span>
-        </h1>
-        <div className="mx-auto my-6 h-px w-16 bg-primary/60" />
+      <div className="w-full max-w-md">
+        <div className="text-center">
+          <span className="badge-dot font-mono">
+            <span className="live-dot" /> ARCHIMONSTER · #{id}
+          </span>
+          <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-5xl">
+            Revela la <span className="text-primary">posición</span>
+          </h1>
+        </div>
 
         {result ? (
-          <div className="parchment-card animate-reveal overflow-hidden p-8 text-center">
-            <div className="mx-auto mb-6 aspect-square w-48 overflow-hidden border border-border">
+          <div className="surface-card animate-reveal mt-8 overflow-hidden">
+            <div className="relative aspect-square w-full overflow-hidden bg-surface-2">
               <img
                 src={`https://raw.githubusercontent.com/Gianxaje/kkkal/main/img/${id}.png`}
                 alt={result.name}
                 className="h-full w-full object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="mono-label text-primary">TARGET LOCATED</div>
+                <div className="mt-1 font-display text-3xl font-semibold">{result.name}</div>
+              </div>
             </div>
-            <h2 className="text-3xl italic text-primary">{result.name}</h2>
-            <dl className="mt-6 grid grid-cols-1 gap-3 text-left">
-              <div className="flex justify-between border-b border-border/60 pb-2">
-                <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Servidor</dt>
-                <dd className="font-mono text-sm text-foreground">{result.server}</dd>
+            <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
+              <div className="p-5">
+                <div className="mono-label">Servidor</div>
+                <div className="mt-1.5 font-display text-lg font-semibold">{result.server}</div>
               </div>
-              <div className="flex justify-between border-b border-border/60 pb-2">
-                <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Posición</dt>
-                <dd className="font-mono text-sm text-foreground">{result.position}</dd>
+              <div className="p-5">
+                <div className="mono-label">Posición</div>
+                <div className="mt-1.5 font-mono text-lg font-semibold text-primary">{result.position}</div>
               </div>
-            </dl>
+            </div>
             {result.message && (
-              <p className="mt-6 text-sm italic text-muted-foreground">{result.message}</p>
+              <div className="border-t border-border p-4 text-center text-sm text-muted-foreground">
+                {result.message}
+              </div>
             )}
           </div>
         ) : (
-          <div className="parchment-card p-8 md:p-10">
+          <div className="surface-card mt-8 p-6 md:p-8">
             {error && (
               <div
                 role="alert"
-                className="mb-6 border border-destructive/60 bg-destructive/15 px-4 py-3 text-sm text-foreground"
-                style={{ color: "#f2e9da" }}
+                className="mb-5 flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm"
               >
-                {error}
+                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-destructive" />
+                <span>{error}</span>
               </div>
             )}
             <form onSubmit={onSubmit} className="space-y-5">
               <div>
-                <label
-                  htmlFor="licencia"
-                  className="mb-2 block font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground"
-                >
+                <label htmlFor="licencia" className="mono-label mb-2 block">
                   Clave de licencia
                 </label>
                 <input
@@ -111,16 +114,17 @@ function PositionPage() {
                   autoComplete="off"
                   value={licencia}
                   onChange={(e) => setLicencia(e.target.value)}
-                  className="w-full border border-border bg-background/60 px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary"
+                  className="field focus:[&]:field-focus"
                   placeholder="XXXX-XXXX-XXXX"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || !licencia.trim()}
-                className="gold-btn w-full disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? "Revelando…" : "Revelar posición"}
+                {!loading && <span aria-hidden>→</span>}
               </button>
             </form>
           </div>
