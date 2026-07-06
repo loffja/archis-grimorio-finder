@@ -24,7 +24,7 @@ function Join() {
           Obtén posiciones en tiempo real haciendo clic en el botón de abajo.
         </p>
         <a
-          href="https://discord.gg/mvEvT5FzND"
+          href="https://discord.gg/4FRsf4uyV6"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-primary relative mt-8 hover:[&]:btn-primary-hover"
@@ -34,7 +34,7 @@ function Join() {
         </a>
         <div className="relative mt-8 border-t border-border pt-6">
           <div className="mono-label">Invite link</div>
-          <div className="mt-1 font-mono text-sm text-foreground">discord.gg/mvEvT5FzND</div>
+          <div className="mt-1 font-mono text-sm text-foreground">discord.gg/4FRsf4uyV6</div>
         </div>
       </div>
     </Layout>
