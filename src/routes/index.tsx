@@ -56,7 +56,7 @@ function HeroVisual() {
       <div className="absolute -left-2 bottom-8 hidden md:block">
         <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
           <div className="text-muted-foreground">SERVER</div>
-          <div>Ilyzaelle</div>
+          <div>Blair</div>
         </div>
       </div>
     </div>
