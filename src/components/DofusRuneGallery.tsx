@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
+
 /**
  * Set of Dofus-inspired SVG rune / class glyphs. Pure SVG, no external deps
  * (Fandom hotlink-blocks). Swap the `label` / add more entries freely.
  */
-const RUNES: { id: string; label: string; render: () => JSX.Element }[] = [
+const RUNES: { id: string; label: string; render: () => ReactNode }[] = [
   {
     id: "iop",
     label: "Iop · Fuerza",
