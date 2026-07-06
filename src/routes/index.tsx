@@ -69,15 +69,15 @@ function Index() {
       <div className="w-full max-w-3xl">
         <div className="text-center">
           <span className="badge-dot">
-            <span className="live-dot" /> Real-time positions
+            <span className="live-dot" /> Dofus Touch · Posiciones en vivo
           </span>
           <h1 className="mt-6 text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
-            Track every <span className="text-gradient">archimonster</span>
-            <br className="hidden sm:block" /> before it moves.
+            Caza cada <span className="text-gradient">archimonstruo</span>
+            <br className="hidden sm:block" /> antes de que huya.
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
-            Archis Touch te da coordenadas exactas y en tiempo real de los
-            archimonstruos, directo desde nuestro pathfinder.
+            DakuBot te entrega coordenadas exactas y en tiempo real de los
+            archimonstruos de Dofus Touch, directo desde nuestro pathfinder.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
