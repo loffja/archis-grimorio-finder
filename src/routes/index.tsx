@@ -77,7 +77,7 @@ function Index() {
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
             Archis Touch te da coordenadas exactas y en tiempo real de los
-            archimonstruos, directo desde la red de rastreadores.
+            archimonstruos, directo desde nuestro pathfinder.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
