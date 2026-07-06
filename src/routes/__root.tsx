@@ -49,16 +49,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Archis Touch — Rastreador de archimonstruos" },
-      { name: "description", content: "Rastrea archimonstruos en tiempo real con Archis Touch." },
-      { property: "og:title", content: "Archis Touch" },
-      { property: "og:description", content: "Rastreador de archimonstruos." },
+      { title: "DakuBot — Rastreador de archimonstruos de Dofus Touch" },
+      { name: "description", content: "DakuBot: rastrea archimonstruos de Dofus Touch en tiempo real." },
+      { property: "og:title", content: "DakuBot" },
+      { property: "og:description", content: "Rastreador de archimonstruos de Dofus Touch." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
