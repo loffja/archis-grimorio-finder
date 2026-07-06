@@ -50,13 +50,13 @@ function HeroVisual() {
       <div className="absolute right-0 top-8 hidden md:block">
         <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
           <div className="text-muted-foreground">Jalatintanic, el Hundido</div>
-          <div className="text-primary">        [2,-8]</div>
+          <div className="text-primary">[2,-8]</div>
         </div>
       </div>
       <div className="absolute -left-2 bottom-8 hidden md:block">
         <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
           <div className="text-muted-foreground">SERVER</div>
-          <div> Blair</div>
+          <div>Blair</div>
         </div>
       </div>
     </div>
