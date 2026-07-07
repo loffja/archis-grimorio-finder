@@ -42,9 +42,9 @@
   --border: #24242c;
   --foreground: #ededf0;
   --muted-foreground: #8a8a94;
-  --primary: #ff5b1f;
+  --primary: #ff2d87;
   --primary-foreground: #0a0a0b;
-  --primary-glow: #ff8f5a;
+  --primary-glow: #ff7ab6;
   --destructive: #f43f5e;
   --success: #22c55e;
 }
@@ -59,8 +59,8 @@
   }
   body {
     background-image:
-      radial-gradient(circle at 15% -10%, rgba(255, 91, 31, 0.12), transparent 40%),
-      radial-gradient(circle at 85% 110%, rgba(255, 91, 31, 0.08), transparent 45%);
+      radial-gradient(circle at 15% -10%, rgba(255, 45, 135, 0.14), transparent 40%),
+      radial-gradient(circle at 85% 110%, rgba(255, 45, 135, 0.09), transparent 45%);
     background-attachment: fixed;
   }
   h1, h2, h3, h4 {
@@ -104,12 +104,12 @@
   gap: 0.6rem;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-  box-shadow: 0 10px 30px -10px rgba(255, 91, 31, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(255, 45, 135, 0.5);
   border: 1px solid rgba(255,255,255,0.08);
 }
 @utility btn-primary-hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 40px -12px rgba(255, 91, 31, 0.65);
+  box-shadow: 0 16px 40px -12px rgba(255, 45, 135, 0.65);
   background: var(--primary-glow);
 }
 
@@ -141,7 +141,7 @@
 }
 @utility field-focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(255, 91, 31, 0.15);
+  box-shadow: 0 0 0 4px rgba(255, 45, 135, 0.15);
 }
 
 @utility mono-label {

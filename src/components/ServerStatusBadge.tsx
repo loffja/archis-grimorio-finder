@@ -6,12 +6,12 @@ import { useEffect, useState } from "react";
  */
 export function ServerStatusBadge() {
   const [ping, setPing] = useState(28);
-  const [players, setPlayers] = useState(1420);
+  const [players, setPlayers] = useState(3);
 
   useEffect(() => {
     const id = setInterval(() => {
       setPing((p) => Math.max(14, Math.min(52, p + (Math.random() * 8 - 4))));
-      setPlayers((p) => Math.max(900, Math.min(2200, p + Math.round(Math.random() * 30 - 15))));
+      setPlayers(() => 1 + Math.floor(Math.random() * 5));
     }, 2400);
     return () => clearInterval(id);
   }, []);
