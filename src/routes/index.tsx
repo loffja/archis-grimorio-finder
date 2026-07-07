@@ -11,6 +11,18 @@ export const Route = createFileRoute("/")({
 function DofusRadar() {
   return (
     <div className="relative mx-auto mt-6 h-[220px] w-full max-w-2xl md:h-[280px]">
+      <div className="absolute right-0 top-2 z-10 hidden md:block">
+        <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
+          <div className="text-muted-foreground">Jalatintanic, el Hundido</div>
+          <div className="text-primary">[2,-8] · Sufokia</div>
+        </div>
+      </div>
+      <div className="absolute -left-2 bottom-2 z-10 hidden md:block">
+        <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
+          <div className="text-muted-foreground">SERVIDOR</div>
+          <div>Blair</div>
+        </div>
+      </div>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="animate-float">
           <svg viewBox="0 0 400 400" className="h-[220px] w-[220px] md:h-[280px] md:w-[280px]" role="img" aria-label="Radar de archimonstruos">
@@ -95,9 +107,6 @@ function Index() {
               Ingresar
               <span aria-hidden="true">→</span>
             </Link>
-            <a href="#how" className="btn-ghost hover:border-primary/50 hover:text-primary">
-              Cómo funciona
-            </a>
           </div>
         </div>
 
