@@ -39,17 +39,17 @@ function DofusRadar() {
           <svg viewBox="0 0 400 400" className="h-[300px] w-[300px] md:h-[380px] md:w-[380px]" role="img" aria-label="Radar de archimonstruos">
             <defs>
               <radialGradient id="ring-glow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#ff5b1f" stopOpacity="0.45" />
-                <stop offset="70%" stopColor="#ff5b1f" stopOpacity="0.05" />
-                <stop offset="100%" stopColor="#ff5b1f" stopOpacity="0" />
+                <stop offset="0%" stopColor="#ff2d87" stopOpacity="0.45" />
+                <stop offset="70%" stopColor="#ff2d87" stopOpacity="0.05" />
+                <stop offset="100%" stopColor="#ff2d87" stopOpacity="0" />
               </radialGradient>
               <linearGradient id="sweep" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="#ff5b1f" stopOpacity="0" />
-                <stop offset="100%" stopColor="#ff5b1f" stopOpacity="0.75" />
+                <stop offset="0%" stopColor="#ff2d87" stopOpacity="0" />
+                <stop offset="100%" stopColor="#ff2d87" stopOpacity="0.75" />
               </linearGradient>
               <radialGradient id="ping" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#ff8f5a" stopOpacity="1" />
-                <stop offset="100%" stopColor="#ff5b1f" stopOpacity="0" />
+                <stop offset="0%" stopColor="#ff7ab6" stopOpacity="1" />
+                <stop offset="100%" stopColor="#ff2d87" stopOpacity="0" />
               </radialGradient>
             </defs>
 
@@ -90,7 +90,7 @@ function DofusRadar() {
             {/* Archimonster pings */}
             <g>
               <circle cx="138" cy="132" r="22" fill="url(#ping)" opacity="0.9" />
-              <circle cx="138" cy="132" r="4" fill="#ff5b1f" />
+              <circle cx="138" cy="132" r="4" fill="#ff2d87" />
               <circle cx="272" cy="248" r="3" fill="#ededf0" />
               <circle cx="238" cy="102" r="3" fill="#ededf0" opacity="0.55" />
               <circle cx="108" cy="272" r="3" fill="#ededf0" opacity="0.65" />
@@ -98,14 +98,14 @@ function DofusRadar() {
 
             {/* Central sigil — six-pointed rune */}
             <g transform="translate(200 200)">
-              <circle r="14" fill="#0a0a0b" stroke="#ff5b1f" strokeWidth="2" />
+              <circle r="14" fill="#0a0a0b" stroke="#ff2d87" strokeWidth="2" />
               <path
                 d="M0 -8 L7 -4 L7 4 L0 8 L-7 4 L-7 -4 Z"
                 fill="none"
-                stroke="#ff5b1f"
+                stroke="#ff2d87"
                 strokeWidth="1.2"
               />
-              <circle r="2" fill="#ff5b1f" />
+              <circle r="2" fill="#ff2d87" />
             </g>
           </svg>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
