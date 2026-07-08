@@ -19,7 +19,10 @@ type Licencia = {
   usedFor?: unknown[];
   createdAt?: string;
   created_at?: string;
+  expiresAt?: string | null;
 };
+
+type DurationUnit = "minutes" | "hours" | "days" | "weeks" | "months";
 
 function AdminPage() {
   return (
@@ -36,6 +39,8 @@ function AdminPanel() {
 
   const [pcId, setPcId] = useState("");
   const [newLic, setNewLic] = useState("");
+  const [durationValue, setDurationValue] = useState("");
+  const [durationUnit, setDurationUnit] = useState<DurationUnit>("days");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
@@ -64,10 +69,16 @@ function AdminPanel() {
     setSubmitting(true);
     setFeedback(null);
     try {
+      const body: Record<string, unknown> = { pc_id: pcId, licencia: newLic };
+      const trimmedDuration = durationValue.trim();
+      if (trimmedDuration !== "") {
+        body.durationValue = Number(trimmedDuration);
+        body.durationUnit = durationUnit;
+      }
       const res = await fetch("https://api.bnotifier.es/registerLicencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pc_id: pcId, licencia: newLic }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -76,6 +87,7 @@ function AdminPanel() {
         setFeedback({ type: "ok", text: data?.message || "Licencia registrada correctamente." });
         setPcId("");
         setNewLic("");
+        setDurationValue("");
         loadLicencias();
       }
     } catch {
@@ -165,6 +177,7 @@ function AdminPanel() {
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Licencia</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Usos</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Creación</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Caduca</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
                 </tr>
               </thead>
@@ -172,6 +185,9 @@ function AdminPanel() {
                 {licencias.map((l, i) => {
                   const created = l.createdAt || l.created_at;
                   const uses = Array.isArray(l.usedFor) ? l.usedFor.length : 0;
+                  const expiresAt = l.expiresAt ?? null;
+                  const expiresDate = expiresAt ? new Date(expiresAt) : null;
+                  const isExpired = expiresDate ? expiresDate.getTime() <= Date.now() : false;
                   return (
                     <tr
                       key={i}
@@ -184,6 +200,18 @@ function AdminPanel() {
                       </td>
                       <td className="px-5 py-3.5 text-muted-foreground">
                         {created ? new Date(created).toLocaleString() : "—"}
+                      </td>
+                      <td
+                        className={
+                          "px-5 py-3.5 " +
+                          (expiresDate
+                            ? isExpired
+                              ? "text-destructive"
+                              : "text-muted-foreground"
+                            : "text-muted-foreground")
+                        }
+                      >
+                        {expiresDate ? expiresDate.toLocaleString() : "Permanente"}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <button
@@ -227,7 +255,7 @@ function AdminPanel() {
             <span className={feedback.type === "err" ? "text-foreground" : ""}>{feedback.text}</span>
           </div>
         )}
-        <form onSubmit={onRegister} className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <form onSubmit={onRegister} className="mt-5 grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="pcid" className="mono-label mb-2 block">
               PC ID
@@ -252,7 +280,38 @@ function AdminPanel() {
               className="field focus:[&]:field-focus"
             />
           </div>
-          <div className="flex items-end">
+          <div>
+            <label htmlFor="duration" className="mono-label mb-2 block">
+              Duración (opcional)
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="duration"
+                type="number"
+                min="1"
+                placeholder="Ej. 24"
+                value={durationValue}
+                onChange={(e) => setDurationValue(e.target.value)}
+                className="field focus:[&]:field-focus flex-1"
+              />
+              <select
+                aria-label="Unidad de duración"
+                value={durationUnit}
+                onChange={(e) => setDurationUnit(e.target.value as DurationUnit)}
+                className="field focus:[&]:field-focus"
+              >
+                <option value="minutes">Minutos</option>
+                <option value="hours">Horas</option>
+                <option value="days">Días</option>
+                <option value="weeks">Semanas</option>
+                <option value="months">Meses</option>
+              </select>
+            </div>
+            <p className="mono-label mt-2 text-muted-foreground">
+              Vacío = licencia permanente
+            </p>
+          </div>
+          <div className="flex items-end md:justify-end">
             <button
               type="submit"
               disabled={submitting}
