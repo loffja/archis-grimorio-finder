@@ -177,6 +177,7 @@ function AdminPanel() {
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Licencia</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Usos</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Creación</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Caduca</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
                 </tr>
               </thead>
