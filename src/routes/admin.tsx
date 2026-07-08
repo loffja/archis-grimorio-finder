@@ -255,7 +255,7 @@ function AdminPanel() {
             <span className={feedback.type === "err" ? "text-foreground" : ""}>{feedback.text}</span>
           </div>
         )}
-        <form onSubmit={onRegister} className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <form onSubmit={onRegister} className="mt-5 grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="pcid" className="mono-label mb-2 block">
               PC ID
@@ -280,7 +280,38 @@ function AdminPanel() {
               className="field focus:[&]:field-focus"
             />
           </div>
-          <div className="flex items-end">
+          <div>
+            <label htmlFor="duration" className="mono-label mb-2 block">
+              Duración (opcional)
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="duration"
+                type="number"
+                min="1"
+                placeholder="Ej. 24"
+                value={durationValue}
+                onChange={(e) => setDurationValue(e.target.value)}
+                className="field focus:[&]:field-focus flex-1"
+              />
+              <select
+                aria-label="Unidad de duración"
+                value={durationUnit}
+                onChange={(e) => setDurationUnit(e.target.value as DurationUnit)}
+                className="field focus:[&]:field-focus"
+              >
+                <option value="minutes">Minutos</option>
+                <option value="hours">Horas</option>
+                <option value="days">Días</option>
+                <option value="weeks">Semanas</option>
+                <option value="months">Meses</option>
+              </select>
+            </div>
+            <p className="mono-label mt-2 text-muted-foreground">
+              Vacío = licencia permanente
+            </p>
+          </div>
+          <div className="flex items-end md:justify-end">
             <button
               type="submit"
               disabled={submitting}
