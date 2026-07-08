@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
-import { DofusRuneGallery } from "@/components/DofusRuneGallery";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -24,15 +23,89 @@ type Licencia = {
 
 type DurationUnit = "minutes" | "hours" | "days" | "weeks" | "months";
 
+const STORAGE_KEY = "admin-key";
+
 function AdminPage() {
+  const [adminKey, setAdminKey] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [keyInput, setKeyInput] = useState("");
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored) setAdminKey(stored);
+  }, []);
+
+  const handleUnauthorized = useCallback(() => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    setAdminKey(null);
+    setKeyInput("");
+    setLoginError("Clave incorrecta.");
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    setAdminKey(null);
+    setKeyInput("");
+    setLoginError(null);
+  }, []);
+
+  function onLogin(e: React.FormEvent) {
+    e.preventDefault();
+    const value = keyInput.trim();
+    if (!value) return;
+    sessionStorage.setItem(STORAGE_KEY, value);
+    setAdminKey(value);
+    setLoginError(null);
+  }
+
   return (
     <Layout>
-      <AdminPanel />
+      {adminKey ? (
+        <AdminPanel adminKey={adminKey} onUnauthorized={handleUnauthorized} onLogout={handleLogout} />
+      ) : (
+        <div className="w-full max-w-md">
+          <div className="surface-card p-6 md:p-8">
+            <span className="mono-label">Admin panel</span>
+            <h1 className="mt-2 font-display text-2xl font-semibold">Acceso restringido</h1>
+            <form onSubmit={onLogin} className="mt-6 space-y-4">
+              <div>
+                <label htmlFor="admin-key" className="mono-label mb-2 block">
+                  Clave de administrador
+                </label>
+                <input
+                  id="admin-key"
+                  type="password"
+                  autoFocus
+                  value={keyInput}
+                  onChange={(e) => setKeyInput(e.target.value)}
+                  className="field focus:[&]:field-focus w-full"
+                />
+              </div>
+              {loginError && (
+                <p role="alert" className="text-sm text-destructive">
+                  {loginError}
+                </p>
+              )}
+              <button type="submit" className="btn-primary w-full justify-center hover:[&]:btn-primary-hover">
+                Entrar →
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
 
-function AdminPanel() {
+function AdminPanel({
+  adminKey,
+  onUnauthorized,
+  onLogout,
+}: {
+  adminKey: string;
+  onUnauthorized: () => void;
+  onLogout: () => void;
+}) {
   const [licencias, setLicencias] = useState<Licencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -45,11 +118,25 @@ function AdminPanel() {
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
 
-  async function loadLicencias() {
+  const authHeaders = useCallback(
+    (extra?: Record<string, string>): Record<string, string> => ({
+      "x-admin-key": adminKey,
+      ...(extra ?? {}),
+    }),
+    [adminKey],
+  );
+
+  const loadLicencias = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetch("https://api.bnotifier.es/licencias");
+      const res = await fetch("https://api.bnotifier.es/licencias", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
       const data = await res.json().catch(() => []);
       if (!res.ok) setLoadError(`Error ${res.status}`);
       else setLicencias(Array.isArray(data) ? data : data?.licencias ?? []);
@@ -58,11 +145,11 @@ function AdminPanel() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [authHeaders, onUnauthorized]);
 
   useEffect(() => {
     loadLicencias();
-  }, []);
+  }, [loadLicencias]);
 
   async function onRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -77,9 +164,13 @@ function AdminPanel() {
       }
       const res = await fetch("https://api.bnotifier.es/registerLicencia", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(body),
       });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setFeedback({ type: "err", text: data?.message || data?.error || `Error ${res.status}` });
@@ -107,8 +198,12 @@ function AdminPanel() {
     try {
       const res = await fetch(
         `https://api.bnotifier.es/licencias/${encodeURIComponent(licencia)}`,
-        { method: "DELETE" },
+        { method: "DELETE", headers: authHeaders() },
       );
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
@@ -144,10 +239,15 @@ function AdminPanel() {
             <div className="mono-label">Usos</div>
             <div className="mt-1 font-display text-2xl font-semibold text-primary">{totalUses}</div>
           </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            Cerrar sesión
+          </button>
         </div>
       </div>
-
-      <DofusRuneGallery />
 
       <section aria-labelledby="licenses-heading" className="surface-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
