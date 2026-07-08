@@ -39,6 +39,8 @@ function AdminPanel() {
 
   const [pcId, setPcId] = useState("");
   const [newLic, setNewLic] = useState("");
+  const [durationValue, setDurationValue] = useState("");
+  const [durationUnit, setDurationUnit] = useState<DurationUnit>("days");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
