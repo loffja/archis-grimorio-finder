@@ -185,6 +185,9 @@ function AdminPanel() {
                 {licencias.map((l, i) => {
                   const created = l.createdAt || l.created_at;
                   const uses = Array.isArray(l.usedFor) ? l.usedFor.length : 0;
+                  const expiresAt = l.expiresAt ?? null;
+                  const expiresDate = expiresAt ? new Date(expiresAt) : null;
+                  const isExpired = expiresDate ? expiresDate.getTime() <= Date.now() : false;
                   return (
                     <tr
                       key={i}
@@ -197,6 +200,18 @@ function AdminPanel() {
                       </td>
                       <td className="px-5 py-3.5 text-muted-foreground">
                         {created ? new Date(created).toLocaleString() : "—"}
+                      </td>
+                      <td
+                        className={
+                          "px-5 py-3.5 " +
+                          (expiresDate
+                            ? isExpired
+                              ? "text-destructive"
+                              : "text-muted-foreground"
+                            : "text-muted-foreground")
+                        }
+                      >
+                        {expiresDate ? expiresDate.toLocaleString() : "Permanente"}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <button
