@@ -13,9 +13,6 @@ import { Route as JoinRouteImport } from './routes/join'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PositionIdRouteImport } from './routes/position.$id'
-import { Route as ApiAuthDiscordLogoutRouteImport } from './routes/api/auth/discord/logout'
-import { Route as ApiAuthDiscordLoginRouteImport } from './routes/api/auth/discord/login'
-import { Route as ApiAuthDiscordCallbackRouteImport } from './routes/api/auth/discord/callback'
 
 const JoinRoute = JoinRouteImport.update({
   id: '/join',
@@ -37,39 +34,18 @@ const PositionIdRoute = PositionIdRouteImport.update({
   path: '/position/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthDiscordLogoutRoute = ApiAuthDiscordLogoutRouteImport.update({
-  id: '/api/auth/discord/logout',
-  path: '/api/auth/discord/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthDiscordLoginRoute = ApiAuthDiscordLoginRouteImport.update({
-  id: '/api/auth/discord/login',
-  path: '/api/auth/discord/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthDiscordCallbackRoute = ApiAuthDiscordCallbackRouteImport.update({
-  id: '/api/auth/discord/callback',
-  path: '/api/auth/discord/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/join': typeof JoinRoute
   '/position/$id': typeof PositionIdRoute
-  '/api/auth/discord/callback': typeof ApiAuthDiscordCallbackRoute
-  '/api/auth/discord/login': typeof ApiAuthDiscordLoginRoute
-  '/api/auth/discord/logout': typeof ApiAuthDiscordLogoutRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/join': typeof JoinRoute
   '/position/$id': typeof PositionIdRoute
-  '/api/auth/discord/callback': typeof ApiAuthDiscordCallbackRoute
-  '/api/auth/discord/login': typeof ApiAuthDiscordLoginRoute
-  '/api/auth/discord/logout': typeof ApiAuthDiscordLogoutRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,38 +53,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/join': typeof JoinRoute
   '/position/$id': typeof PositionIdRoute
-  '/api/auth/discord/callback': typeof ApiAuthDiscordCallbackRoute
-  '/api/auth/discord/login': typeof ApiAuthDiscordLoginRoute
-  '/api/auth/discord/logout': typeof ApiAuthDiscordLogoutRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/admin'
-    | '/join'
-    | '/position/$id'
-    | '/api/auth/discord/callback'
-    | '/api/auth/discord/login'
-    | '/api/auth/discord/logout'
+  fullPaths: '/' | '/admin' | '/join' | '/position/$id'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/admin'
-    | '/join'
-    | '/position/$id'
-    | '/api/auth/discord/callback'
-    | '/api/auth/discord/login'
-    | '/api/auth/discord/logout'
-  id:
-    | '__root__'
-    | '/'
-    | '/admin'
-    | '/join'
-    | '/position/$id'
-    | '/api/auth/discord/callback'
-    | '/api/auth/discord/login'
-    | '/api/auth/discord/logout'
+  to: '/' | '/admin' | '/join' | '/position/$id'
+  id: '__root__' | '/' | '/admin' | '/join' | '/position/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,9 +67,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   JoinRoute: typeof JoinRoute
   PositionIdRoute: typeof PositionIdRoute
-  ApiAuthDiscordCallbackRoute: typeof ApiAuthDiscordCallbackRoute
-  ApiAuthDiscordLoginRoute: typeof ApiAuthDiscordLoginRoute
-  ApiAuthDiscordLogoutRoute: typeof ApiAuthDiscordLogoutRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -151,27 +99,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PositionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/discord/logout': {
-      id: '/api/auth/discord/logout'
-      path: '/api/auth/discord/logout'
-      fullPath: '/api/auth/discord/logout'
-      preLoaderRoute: typeof ApiAuthDiscordLogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/discord/login': {
-      id: '/api/auth/discord/login'
-      path: '/api/auth/discord/login'
-      fullPath: '/api/auth/discord/login'
-      preLoaderRoute: typeof ApiAuthDiscordLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/discord/callback': {
-      id: '/api/auth/discord/callback'
-      path: '/api/auth/discord/callback'
-      fullPath: '/api/auth/discord/callback'
-      preLoaderRoute: typeof ApiAuthDiscordCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -180,9 +107,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   JoinRoute: JoinRoute,
   PositionIdRoute: PositionIdRoute,
-  ApiAuthDiscordCallbackRoute: ApiAuthDiscordCallbackRoute,
-  ApiAuthDiscordLoginRoute: ApiAuthDiscordLoginRoute,
-  ApiAuthDiscordLogoutRoute: ApiAuthDiscordLogoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
