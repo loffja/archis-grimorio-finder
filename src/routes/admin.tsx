@@ -19,7 +19,10 @@ type Licencia = {
   usedFor?: unknown[];
   createdAt?: string;
   created_at?: string;
+  expiresAt?: string | null;
 };
+
+type DurationUnit = "minutes" | "hours" | "days" | "weeks" | "months";
 
 function AdminPage() {
   return (
