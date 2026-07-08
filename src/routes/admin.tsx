@@ -23,6 +23,15 @@ type Licencia = {
 
 type DurationUnit = "minutes" | "hours" | "days" | "weeks" | "months";
 
+type ArchimonstruoActivo = {
+  id: number;
+  name: string;
+  server: string;
+  position: string;
+  date: string;
+  imageUrl: string;
+};
+
 const STORAGE_KEY = "admin-key";
 
 function AdminPage() {
@@ -118,6 +127,10 @@ function AdminPanel({
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
 
+  const [archimonstruos, setArchimonstruos] = useState<ArchimonstruoActivo[]>([]);
+  const [loadingArchis, setLoadingArchis] = useState(true);
+  const [archisError, setArchisError] = useState<string | null>(null);
+
   const authHeaders = useCallback(
     (extra?: Record<string, string>): Record<string, string> => ({
       "x-admin-key": adminKey,
@@ -150,6 +163,31 @@ function AdminPanel({
   useEffect(() => {
     loadLicencias();
   }, [loadLicencias]);
+
+  const loadArchimonstruos = useCallback(async () => {
+    setLoadingArchis(true);
+    setArchisError(null);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/archimonstruos", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => []);
+      if (!res.ok) setArchisError(`Error ${res.status}`);
+      else setArchimonstruos(Array.isArray(data) ? data : []);
+    } catch {
+      setArchisError("No se pudo cargar la lista.");
+    } finally {
+      setLoadingArchis(false);
+    }
+  }, [authHeaders, onUnauthorized]);
+
+  useEffect(() => {
+    loadArchimonstruos();
+  }, [loadArchimonstruos]);
 
   async function onRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -421,6 +459,51 @@ function AdminPanel({
             </button>
           </div>
         </form>
+      </section>
+
+      <section aria-labelledby="archis-heading" className="surface-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 id="archis-heading" className="font-display text-lg font-semibold">
+            Archimonstruos activos
+          </h2>
+          <button
+            onClick={loadArchimonstruos}
+            className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            ↻ Recargar
+          </button>
+        </div>
+        {loadingArchis ? (
+          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+        ) : archisError ? (
+          <p className="py-10 text-center text-destructive">{archisError}</p>
+        ) : archimonstruos.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">
+            No hay archimonstruos activos ahora mismo.
+          </p>
+        ) : (
+          <ul role="list" className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-3 md:grid-cols-4">
+            {archimonstruos.map((a) => (
+              <li
+                key={a.id}
+                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-2/40 p-4 text-center"
+              >
+                <img
+                  src={a.imageUrl}
+                  alt={a.name}
+                  loading="lazy"
+                  className="h-16 w-16 rounded-lg object-contain"
+                />
+                <span className="font-display text-sm font-semibold leading-tight">{a.name}</span>
+                <span className="mono-label text-[0.65rem] text-muted-foreground">{a.server}</span>
+                <span className="font-mono text-sm text-primary">{a.position}</span>
+                <span className="mono-label text-[0.6rem] text-muted-foreground">
+                  {a.date ? new Date(a.date).toLocaleString() : "—"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
