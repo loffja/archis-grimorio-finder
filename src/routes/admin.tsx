@@ -38,6 +38,7 @@ function AdminPanel() {
   const [newLic, setNewLic] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
 
   async function loadLicencias() {
     setLoading(true);
@@ -81,6 +82,32 @@ function AdminPanel() {
       setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete(licencia: string) {
+    const confirmed = window.confirm(
+      `¿Eliminar la licencia "${licencia}"? Esta acción no se puede deshacer.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingKey(licencia);
+    try {
+      const res = await fetch(
+        `https://api.bnotifier.es/licencias/${encodeURIComponent(licencia)}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
+      } else {
+        setLicencias((prev) => prev.filter((l) => l.licencia !== licencia));
+        setFeedback({ type: "ok", text: data?.message || "Licencia eliminada." });
+      }
+    } catch {
+      setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+    } finally {
+      setDeletingKey(null);
     }
   }
 
@@ -138,6 +165,7 @@ function AdminPanel() {
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Licencia</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Usos</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal">Creación</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
                 </tr>
               </thead>
               <tbody className="font-mono">
@@ -156,6 +184,16 @@ function AdminPanel() {
                       </td>
                       <td className="px-5 py-3.5 text-muted-foreground">
                         {created ? new Date(created).toLocaleString() : "—"}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(l.licencia)}
+                          disabled={deletingKey === l.licencia}
+                          className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
+                        >
+                          {deletingKey === l.licencia ? "…" : "Eliminar"}
+                        </button>
                       </td>
                     </tr>
                   );
