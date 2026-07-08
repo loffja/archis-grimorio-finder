@@ -69,10 +69,16 @@ function AdminPanel() {
     setSubmitting(true);
     setFeedback(null);
     try {
+      const body: Record<string, unknown> = { pc_id: pcId, licencia: newLic };
+      const trimmedDuration = durationValue.trim();
+      if (trimmedDuration !== "") {
+        body.durationValue = Number(trimmedDuration);
+        body.durationUnit = durationUnit;
+      }
       const res = await fetch("https://api.bnotifier.es/registerLicencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pc_id: pcId, licencia: newLic }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -81,6 +87,7 @@ function AdminPanel() {
         setFeedback({ type: "ok", text: data?.message || "Licencia registrada correctamente." });
         setPcId("");
         setNewLic("");
+        setDurationValue("");
         loadLicencias();
       }
     } catch {
