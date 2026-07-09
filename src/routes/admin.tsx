@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 
 export const Route = createFileRoute("/admin")({
@@ -130,6 +130,8 @@ function AdminPanel({
   const [archimonstruos, setArchimonstruos] = useState<ArchimonstruoActivo[]>([]);
   const [loadingArchis, setLoadingArchis] = useState(true);
   const [archisError, setArchisError] = useState<string | null>(null);
+  const [archisLive, setArchisLive] = useState(false);
+  const archisRef = useRef<ArchimonstruoActivo[]>([]);
 
   const authHeaders = useCallback(
     (extra?: Record<string, string>): Record<string, string> => ({
@@ -176,8 +178,16 @@ function AdminPanel({
         return;
       }
       const data = await res.json().catch(() => []);
-      if (!res.ok) setArchisError(`Error ${res.status}`);
-      else setArchimonstruos(Array.isArray(data) ? data : []);
+      if (!res.ok) {
+        setArchisError(`Error ${res.status}`);
+      } else {
+        const list: ArchimonstruoActivo[] = Array.isArray(data) ? data : [];
+        const sorted = [...list].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+        archisRef.current = sorted;
+        setArchimonstruos(sorted);
+      }
     } catch {
       setArchisError("No se pudo cargar la lista.");
     } finally {
@@ -187,7 +197,37 @@ function AdminPanel({
 
   useEffect(() => {
     loadArchimonstruos();
+    // Respaldo por si la conexión en tiempo real se corta un rato.
+    const fallbackId = setInterval(loadArchimonstruos, 120000);
+    return () => clearInterval(fallbackId);
   }, [loadArchimonstruos]);
+
+  // Conexión en tiempo real: el backend empuja cada archimonstruo nuevo
+  // (con posición) apenas se registra, mientras el panel esté abierto.
+  useEffect(() => {
+    const source = new EventSource(
+      `https://api.bnotifier.es/admin/events?key=${encodeURIComponent(adminKey)}`,
+    );
+
+    source.onopen = () => setArchisLive(true);
+    source.onerror = () => setArchisLive(false);
+
+    source.onmessage = (event) => {
+      try {
+        const incoming: ArchimonstruoActivo = JSON.parse(event.data);
+        const withoutDuplicate = archisRef.current.filter((a) => a.id !== incoming.id);
+        const merged = [incoming, ...withoutDuplicate].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+        archisRef.current = merged;
+        setArchimonstruos(merged);
+      } catch {
+        // Mensaje no reconocido, se ignora.
+      }
+    };
+
+    return () => source.close();
+  }, [adminKey]);
 
   async function onRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -463,8 +503,13 @@ function AdminPanel({
 
       <section aria-labelledby="archis-heading" className="surface-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 id="archis-heading" className="font-display text-lg font-semibold">
+          <h2 id="archis-heading" className="font-display text-lg font-semibold flex items-center gap-2">
             Archimonstruos activos
+            <span
+              className={archisLive ? "live-dot" : "live-dot opacity-30"}
+              aria-hidden="true"
+              title={archisLive ? "En vivo" : "Conectando…"}
+            />
           </h2>
           <button
             onClick={loadArchimonstruos}
