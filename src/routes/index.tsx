@@ -109,7 +109,7 @@ function Index() {
             </Link>
             <Link
               to="/how-it-works"
-              className="mono-label rounded-lg border border-border px-4 py-2.5 transition-colors hover:border-primary/60 hover:text-primary"
+              className="mono-label rounded-lg border border-primary/40 px-4 py-2.5 text-primary transition-colors hover:border-primary hover:bg-primary/10"
             >
               Cómo funciona
             </Link>
