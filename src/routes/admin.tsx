@@ -53,6 +53,7 @@ const ACTION_LABELS: Record<string, string> = {
   licencia_eliminada: "Licencia eliminada",
   codigo_creado: "Código promocional creado",
   codigo_eliminado: "Código promocional eliminado",
+  ajustes_actualizados: "Interruptor cambiado",
 };
 
 function formatAuditDetails(entry: AuditEntry): string {
@@ -66,6 +67,10 @@ function formatAuditDetails(entry: AuditEntry): string {
       return `${d.code ?? "?"} · máx. ${d.maxUses ?? "?"} usos`;
     case "codigo_eliminado":
       return `${d.code ?? "?"}`;
+    case "ajustes_actualizados":
+      return Object.entries(d)
+        .map(([k, v]) => `${k}: ${v ? "activo" : "desactivado"}`)
+        .join(", ");
     default:
       return JSON.stringify(d);
   }
@@ -194,6 +199,10 @@ function AdminPanel({
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(true);
   const [auditError, setAuditError] = useState<string | null>(null);
+
+  const [settings, setSettings] = useState<{ redeemEnabled: boolean; validateEnabled: boolean } | null>(null);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [savingSettings, setSavingSettings] = useState<string | null>(null);
 
   const authHeaders = useCallback(
     (extra?: Record<string, string>): Record<string, string> => ({
@@ -340,6 +349,55 @@ function AdminPanel({
   useEffect(() => {
     loadAuditLog();
   }, [loadAuditLog]);
+
+  const loadSettings = useCallback(async () => {
+    setLoadingSettings(true);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/settings", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      if (res.ok && data) setSettings(data);
+    } catch {
+      // Si falla, los interruptores simplemente no se muestran.
+    } finally {
+      setLoadingSettings(false);
+    }
+  }, [authHeaders, onUnauthorized]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  async function toggleSetting(key: "redeemEnabled" | "validateEnabled") {
+    if (!settings) return;
+    const nextValue = !settings[key];
+    setSavingSettings(key);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/settings", {
+        method: "PUT",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ [key]: nextValue }),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      if (res.ok && data) {
+        setSettings(data);
+        loadAuditLog();
+      }
+    } catch {
+      // Si falla, el interruptor simplemente no cambia visualmente.
+    } finally {
+      setSavingSettings(null);
+    }
+  }
 
   async function onCreatePromo(e: React.FormEvent) {
     e.preventDefault();
@@ -516,6 +574,60 @@ function AdminPanel({
           </button>
         </div>
       </div>
+
+      {!loadingSettings && settings && (
+        <section
+          aria-labelledby="killswitch-heading"
+          className="surface-card border-destructive/30 p-5"
+        >
+          <h2 id="killswitch-heading" className="mono-label text-destructive">
+            ⚠ Interruptor de emergencia
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Desactiva estas funciones al instante para todo el mundo, sin tocar código.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface-2/40 px-4 py-3">
+              <div>
+                <div className="font-mono text-sm">Canjear códigos</div>
+                <div className="mono-label text-[0.65rem] text-muted-foreground">/redeem</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => toggleSetting("redeemEnabled")}
+                disabled={savingSettings === "redeemEnabled"}
+                className={
+                  "mono-label rounded-full px-3 py-1 text-[0.7rem] transition-colors disabled:opacity-50 " +
+                  (settings.redeemEnabled
+                    ? "border border-[color:var(--success)]/50 text-[color:var(--success)]"
+                    : "border border-destructive/50 text-destructive")
+                }
+              >
+                {savingSettings === "redeemEnabled" ? "…" : settings.redeemEnabled ? "Activo" : "Desactivado"}
+              </button>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface-2/40 px-4 py-3">
+              <div>
+                <div className="font-mono text-sm">Revelar posiciones</div>
+                <div className="mono-label text-[0.65rem] text-muted-foreground">/position/:id</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => toggleSetting("validateEnabled")}
+                disabled={savingSettings === "validateEnabled"}
+                className={
+                  "mono-label rounded-full px-3 py-1 text-[0.7rem] transition-colors disabled:opacity-50 " +
+                  (settings.validateEnabled
+                    ? "border border-[color:var(--success)]/50 text-[color:var(--success)]"
+                    : "border border-destructive/50 text-destructive")
+                }
+              >
+                {savingSettings === "validateEnabled" ? "…" : settings.validateEnabled ? "Activo" : "Desactivado"}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section aria-labelledby="licenses-heading" className="surface-card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
