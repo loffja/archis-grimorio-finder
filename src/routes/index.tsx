@@ -107,6 +107,12 @@ function Index() {
               Ingresar
               <span aria-hidden="true">→</span>
             </Link>
+            <Link
+              to="/how-it-works"
+              className="mono-label rounded-lg border border-border px-4 py-2.5 transition-colors hover:border-primary/60 hover:text-primary"
+            >
+              Cómo funciona
+            </Link>
           </div>
         </div>
 
@@ -114,8 +120,8 @@ function Index() {
 
         <div id="how" className="mt-6 grid gap-3 md:grid-cols-3">
           {[
-            { k: "01", t: "Únete", d: "Entra al servidor de Discord y obtén tu clave de licencia." },
-            { k: "02", t: "Introduce", d: "Pega la clave en la página del archimonstruo objetivo." },
+            { k: "01", t: "Explora", d: "Mira en LIVE qué archimonstruos están activos ahora mismo." },
+            { k: "02", t: "Consigue tu clave", d: "Únete a Discord o canjea un código en REDEEM." },
             { k: "03", t: "Revela", d: "Recibe posición, servidor y nombre al instante." },
           ].map((s) => (
             <div key={s.k} className="surface-card p-4">
@@ -124,6 +130,14 @@ function Index() {
               <p className="mt-1 text-xs text-muted-foreground md:text-sm">{s.d}</p>
             </div>
           ))}
+        </div>
+        <div className="mt-3 text-center">
+          <Link
+            to="/how-it-works"
+            className="mono-label text-muted-foreground transition-colors hover:text-primary"
+          >
+            Ver guía completa →
+          </Link>
         </div>
       </div>
     </Layout>
