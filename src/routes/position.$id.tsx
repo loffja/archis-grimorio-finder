@@ -18,6 +18,7 @@ type RevealResult = {
   server: string;
   name: string;
   date?: string;
+  licenseExpiresAt?: string | null;
 };
 
 function formatElapsed(msSince: number): string {
@@ -34,6 +35,20 @@ function formatElapsed(msSince: number): string {
   return `hace ${hours}h ${minutes}min`;
 }
 
+function formatRemaining(msRemaining: number): string {
+  if (msRemaining <= 0) return "caducada";
+  const totalSeconds = Math.floor(msRemaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}min`;
+  if (hours > 0) return `${hours}h ${minutes}min ${seconds}s`;
+  if (minutes > 0) return `${minutes}min ${seconds}s`;
+  return `${seconds}s`;
+}
+
 function PositionPage() {
   const { id } = Route.useParams();
   const [licencia, setLicencia] = useState("");
@@ -42,12 +57,13 @@ function PositionPage() {
   const [result, setResult] = useState<RevealResult | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
-  // Para que "hace X min" siga contando mientras el usuario mira la página.
+  // Para que "hace X min" y la cuenta atrás de la licencia sigan
+  // actualizándose solas mientras el usuario mira la página.
   useEffect(() => {
-    if (!result?.date) return;
+    if (!result) return;
     const tickId = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(tickId);
-  }, [result?.date]);
+  }, [result]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,6 +89,9 @@ function PositionPage() {
   }
 
   const appearedAt = result?.date ? new Date(result.date).getTime() : null;
+  const licenseExpiresAt = result?.licenseExpiresAt
+    ? new Date(result.licenseExpiresAt).getTime()
+    : null;
 
   return (
     <Layout>
@@ -118,6 +137,23 @@ function PositionPage() {
                 </div>
               </div>
             )}
+            <div className="border-t border-border p-5 text-center">
+              <div className="mono-label flex items-center justify-center gap-2">
+                <span className="live-dot" aria-hidden="true" />
+                Tu licencia
+              </div>
+              <div className="mt-1.5 font-mono text-sm">
+                {licenseExpiresAt ? (
+                  <span className={now >= licenseExpiresAt ? "text-destructive" : "text-primary"}>
+                    {now >= licenseExpiresAt
+                      ? "Ha caducado"
+                      : `Vence en ${formatRemaining(licenseExpiresAt - now)}`}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Permanente</span>
+                )}
+              </div>
+            </div>
             {result.message && (
               <div className="border-t border-border p-4 text-center text-sm text-muted-foreground">
                 {result.message}
