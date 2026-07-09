@@ -32,6 +32,16 @@ type ArchimonstruoActivo = {
   imageUrl: string;
 };
 
+type PromoCodeItem = {
+  code: string;
+  durationValue: number | null;
+  durationUnit: string | null;
+  maxUses: number;
+  uses: number;
+  active: boolean;
+  date?: string;
+};
+
 const STORAGE_KEY = "admin-key";
 
 function generateLicenseKey(): string {
@@ -141,6 +151,17 @@ function AdminPanel({
   const [archisLive, setArchisLive] = useState(false);
   const archisRef = useRef<ArchimonstruoActivo[]>([]);
 
+  const [promoCodes, setPromoCodes] = useState<PromoCodeItem[]>([]);
+  const [loadingPromos, setLoadingPromos] = useState(true);
+  const [promosError, setPromosError] = useState<string | null>(null);
+  const [newCode, setNewCode] = useState("");
+  const [promoDurationValue, setPromoDurationValue] = useState("");
+  const [promoDurationUnit, setPromoDurationUnit] = useState<DurationUnit>("days");
+  const [maxUses, setMaxUses] = useState("1");
+  const [promoSubmitting, setPromoSubmitting] = useState(false);
+  const [promoFeedback, setPromoFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [deletingCode, setDeletingCode] = useState<string | null>(null);
+
   const authHeaders = useCallback(
     (extra?: Record<string, string>): Record<string, string> => ({
       "x-admin-key": adminKey,
@@ -236,6 +257,99 @@ function AdminPanel({
 
     return () => source.close();
   }, [adminKey]);
+
+  const loadPromoCodes = useCallback(async () => {
+    setLoadingPromos(true);
+    setPromosError(null);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/promocodes", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => []);
+      if (!res.ok) setPromosError(`Error ${res.status}`);
+      else setPromoCodes(Array.isArray(data) ? data : []);
+    } catch {
+      setPromosError("No se pudo cargar la lista.");
+    } finally {
+      setLoadingPromos(false);
+    }
+  }, [authHeaders, onUnauthorized]);
+
+  useEffect(() => {
+    loadPromoCodes();
+  }, [loadPromoCodes]);
+
+  async function onCreatePromo(e: React.FormEvent) {
+    e.preventDefault();
+    setPromoSubmitting(true);
+    setPromoFeedback(null);
+    try {
+      const body: Record<string, unknown> = {
+        code: newCode.trim(),
+        maxUses: Number(maxUses) || 1,
+      };
+      const trimmedDuration = promoDurationValue.trim();
+      if (trimmedDuration !== "") {
+        body.durationValue = Number(trimmedDuration);
+        body.durationUnit = promoDurationUnit;
+      }
+      const res = await fetch("https://api.bnotifier.es/admin/promocodes", {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPromoFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
+      } else {
+        setPromoFeedback({ type: "ok", text: data?.message || "Código creado." });
+        setNewCode("");
+        setPromoDurationValue("");
+        setMaxUses("1");
+        loadPromoCodes();
+      }
+    } catch {
+      setPromoFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+    } finally {
+      setPromoSubmitting(false);
+    }
+  }
+
+  async function handleDeletePromo(code: string) {
+    const confirmed = window.confirm(`¿Eliminar el código "${code}"?`);
+    if (!confirmed) return;
+
+    setDeletingCode(code);
+    try {
+      const res = await fetch(
+        `https://api.bnotifier.es/admin/promocodes/${encodeURIComponent(code)}`,
+        { method: "DELETE", headers: authHeaders() },
+      );
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPromoFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
+      } else {
+        setPromoCodes((prev) => prev.filter((p) => p.code !== code));
+        setPromoFeedback({ type: "ok", text: data?.message || "Código eliminado." });
+      }
+    } catch {
+      setPromoFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+    } finally {
+      setDeletingCode(null);
+    }
+  }
 
   async function onRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -586,6 +700,165 @@ function AdminPanel({
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="promo-heading" className="surface-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 id="promo-heading" className="font-display text-lg font-semibold">
+            Códigos promocionales
+          </h2>
+          <button
+            onClick={loadPromoCodes}
+            className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            ↻ Recargar
+          </button>
+        </div>
+        {loadingPromos ? (
+          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+        ) : promosError ? (
+          <p className="py-10 text-center text-destructive">{promosError}</p>
+        ) : promoCodes.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">Sin códigos todavía.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <caption className="sr-only">Lista de códigos promocionales</caption>
+              <thead>
+                <tr className="border-b border-border">
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Código</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Duración</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Usos</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Estado</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
+                </tr>
+              </thead>
+              <tbody className="font-mono">
+                {promoCodes.map((p) => (
+                  <tr
+                    key={p.code}
+                    className="border-b border-border/60 last:border-0 hover:bg-surface-2/50"
+                  >
+                    <td className="px-5 py-3.5 text-primary">{p.code}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">
+                      {p.durationValue && p.durationUnit
+                        ? `${p.durationValue} ${p.durationUnit}`
+                        : "Permanente"}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="badge-dot">{p.uses}/{p.maxUses}</span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={p.active ? "text-primary" : "text-muted-foreground"}>
+                        {p.active ? "Activo" : "Agotado"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePromo(p.code)}
+                        disabled={deletingCode === p.code}
+                        className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
+                      >
+                        {deletingCode === p.code ? "…" : "Eliminar"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="border-t border-border p-6 md:p-8">
+          <h3 className="font-display text-base font-semibold">Crear código nuevo</h3>
+          {promoFeedback && (
+            <div
+              role="alert"
+              className={
+                "mt-4 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm " +
+                (promoFeedback.type === "ok"
+                  ? "border-[color:var(--success)]/40 bg-[color:var(--success)]/10"
+                  : "border-destructive/40 bg-destructive/10")
+              }
+              style={promoFeedback.type === "ok" ? { color: "var(--success)" } : undefined}
+            >
+              <span
+                aria-hidden="true"
+                className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
+                style={{ background: promoFeedback.type === "ok" ? "var(--success)" : "var(--destructive)" }}
+              />
+              <span className={promoFeedback.type === "err" ? "text-foreground" : ""}>
+                {promoFeedback.text}
+              </span>
+            </div>
+          )}
+          <form onSubmit={onCreatePromo} className="mt-5 grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="promocode" className="mono-label mb-2 block">
+                Código
+              </label>
+              <input
+                id="promocode"
+                required
+                value={newCode}
+                onChange={(e) => setNewCode(e.target.value)}
+                placeholder="PROMO2026"
+                className="field focus:[&]:field-focus"
+              />
+            </div>
+            <div>
+              <label htmlFor="maxuses" className="mono-label mb-2 block">
+                Usos máximos
+              </label>
+              <input
+                id="maxuses"
+                type="number"
+                min="1"
+                value={maxUses}
+                onChange={(e) => setMaxUses(e.target.value)}
+                className="field focus:[&]:field-focus"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="promoduration" className="mono-label mb-2 block">
+                Duración de la licencia (opcional — vacío = permanente)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="promoduration"
+                  type="number"
+                  min="1"
+                  placeholder="Ej. 7"
+                  value={promoDurationValue}
+                  onChange={(e) => setPromoDurationValue(e.target.value)}
+                  className="field focus:[&]:field-focus flex-1"
+                />
+                <select
+                  aria-label="Unidad de duración del código"
+                  value={promoDurationUnit}
+                  onChange={(e) => setPromoDurationUnit(e.target.value as DurationUnit)}
+                  className="field focus:[&]:field-focus"
+                >
+                  <option value="minutes">Minutos</option>
+                  <option value="hours">Horas</option>
+                  <option value="days">Días</option>
+                  <option value="weeks">Semanas</option>
+                  <option value="months">Meses</option>
+                </select>
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                disabled={promoSubmitting}
+                className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:opacity-50 md:w-auto"
+              >
+                {promoSubmitting ? "…" : "Crear código →"}
+              </button>
+            </div>
+          </form>
+        </div>
       </section>
     </div>
   );
