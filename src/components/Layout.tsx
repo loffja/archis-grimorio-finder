@@ -14,6 +14,28 @@ function LogoMark({ className = "" }: { className?: string }) {
   );
 }
 
+const NAV_LINKS = [
+  { to: "/live", label: "En vivo" },
+  { to: "/join", label: "Únete" },
+] as const;
+
+function NavMenu() {
+  return (
+    <nav aria-label="Principal" className="flex items-center gap-5">
+      {NAV_LINKS.map((link) => (
+        <Link
+          key={link.to}
+          to={link.to}
+          className="mono-label text-muted-foreground transition-colors hover:text-primary focus-visible:text-primary"
+          activeProps={{ className: "text-primary" }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-dvh flex-col">
@@ -25,7 +47,7 @@ export function Layout({ children }: { children: ReactNode }) {
         Saltar al contenido
       </a>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
-      <header className="relative z-10 flex items-center justify-between px-6 py-3 md:px-10">
+      <header className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-3 md:px-10">
         <Link
           to="/"
           className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -39,7 +61,10 @@ export function Layout({ children }: { children: ReactNode }) {
             <div className="mono-label mt-0.5 text-[0.55rem]">Dofus Touch · Archimonster Tracker</div>
           </div>
         </Link>
-        <ServerStatusBadge />
+        <div className="flex items-center gap-5">
+          <NavMenu />
+          <ServerStatusBadge />
+        </div>
       </header>
       <main id="main-content" className="relative z-10 flex flex-1 items-start justify-center px-4 py-4 md:items-center md:px-8 md:py-6">
         {children}
