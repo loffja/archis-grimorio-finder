@@ -72,7 +72,10 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       <footer className="relative z-10 border-t border-border/60 py-6 text-center">
         <p className="font-mono text-xs text-muted-foreground">
-          © DakuBot {new Date().getFullYear()} — Rastreador para Dofus Touch.
+          © DakuBot {new Date().getFullYear()} — Rastreador para Dofus Touch.{" "}
+          <Link to="/terms" className="underline decoration-dotted underline-offset-2 hover:text-primary">
+            Términos y aviso legal
+          </Link>
         </p>
       </footer>
     </div>
