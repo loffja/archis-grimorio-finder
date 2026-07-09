@@ -1,0 +1,25 @@
+{
+  "name": "DakuBot — Archimonster Tracker",
+  "short_name": "DakuBot",
+  "description": "Rastreador de archimonstruos en tiempo real para Dofus Touch.",
+  "start_url": "/live",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
+  "icons": [
+    {
+      "src": "/dakubot-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/dakubot-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
