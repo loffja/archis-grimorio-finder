@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 
 export const Route = createFileRoute("/position/$id")({
@@ -17,7 +17,22 @@ type RevealResult = {
   position: string;
   server: string;
   name: string;
+  date?: string;
 };
+
+function formatElapsed(msSince: number): string {
+  const totalSeconds = Math.max(0, Math.floor(msSince / 1000));
+  if (totalSeconds < 60) {
+    return `hace ${totalSeconds}s`;
+  }
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  if (totalMinutes < 60) {
+    return `hace ${totalMinutes} min`;
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `hace ${hours}h ${minutes}min`;
+}
 
 function PositionPage() {
   const { id } = Route.useParams();
@@ -25,6 +40,14 @@ function PositionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RevealResult | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Para que "hace X min" siga contando mientras el usuario mira la página.
+  useEffect(() => {
+    if (!result?.date) return;
+    const tickId = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(tickId);
+  }, [result?.date]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,6 +71,8 @@ function PositionPage() {
       setLoading(false);
     }
   }
+
+  const appearedAt = result?.date ? new Date(result.date).getTime() : null;
 
   return (
     <Layout>
@@ -85,6 +110,14 @@ function PositionPage() {
                 <div className="mt-1.5 font-mono text-lg font-semibold text-primary">{result.position}</div>
               </div>
             </div>
+            {appearedAt && (
+              <div className="border-t border-border p-5 text-center">
+                <div className="mono-label">Apareció</div>
+                <div className="mt-1.5 font-mono text-sm text-muted-foreground">
+                  {formatElapsed(now - appearedAt)} · {new Date(appearedAt).toLocaleString()}
+                </div>
+              </div>
+            )}
             {result.message && (
               <div className="border-t border-border p-4 text-center text-sm text-muted-foreground">
                 {result.message}
