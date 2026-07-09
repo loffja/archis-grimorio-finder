@@ -48,29 +48,46 @@ type AuditEntry = {
   date: string;
 };
 
+type AdminKeyItem = {
+  _id: string;
+  name: string;
+  key: string;
+  active: boolean;
+  date?: string;
+};
+
 const ACTION_LABELS: Record<string, string> = {
   licencia_creada: "Licencia creada",
   licencia_eliminada: "Licencia eliminada",
   codigo_creado: "Código promocional creado",
   codigo_eliminado: "Código promocional eliminado",
   ajustes_actualizados: "Interruptor cambiado",
+  admin_creado: "Administrador añadido",
+  admin_revocado: "Administrador revocado",
 };
 
 function formatAuditDetails(entry: AuditEntry): string {
   const d = entry.details || {};
+  const by = d.by ? ` · por ${d.by}` : "";
   switch (entry.action) {
     case "licencia_creada":
-      return `${d.licencia ?? "?"} · PC ID: ${d.pc_id ?? "?"}`;
+      return `${d.licencia ?? "?"} · PC ID: ${d.pc_id ?? "?"}${by}`;
     case "licencia_eliminada":
-      return `${d.licencia ?? "?"}`;
+      return `${d.licencia ?? "?"}${by}`;
     case "codigo_creado":
-      return `${d.code ?? "?"} · máx. ${d.maxUses ?? "?"} usos`;
+      return `${d.code ?? "?"} · máx. ${d.maxUses ?? "?"} usos${by}`;
     case "codigo_eliminado":
-      return `${d.code ?? "?"}`;
+      return `${d.code ?? "?"}${by}`;
+    case "admin_creado":
+    case "admin_revocado":
+      return `${d.name ?? "?"}${by}`;
     case "ajustes_actualizados":
-      return Object.entries(d)
-        .map(([k, v]) => `${k}: ${v ? "activo" : "desactivado"}`)
-        .join(", ");
+      return (
+        Object.entries(d)
+          .filter(([k]) => k !== "by")
+          .map(([k, v]) => `${k}: ${v ? "activo" : "desactivado"}`)
+          .join(", ") + by
+      );
     default:
       return JSON.stringify(d);
   }
@@ -203,6 +220,14 @@ function AdminPanel({
   const [settings, setSettings] = useState<{ redeemEnabled: boolean; validateEnabled: boolean } | null>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState<string | null>(null);
+
+  const [adminKeys, setAdminKeys] = useState<AdminKeyItem[]>([]);
+  const [loadingAdminKeys, setLoadingAdminKeys] = useState(true);
+  const [adminKeysError, setAdminKeysError] = useState<string | null>(null);
+  const [newAdminName, setNewAdminName] = useState("");
+  const [creatingAdminKey, setCreatingAdminKey] = useState(false);
+  const [revokingAdminKey, setRevokingAdminKey] = useState<string | null>(null);
+  const [lastCreatedKey, setLastCreatedKey] = useState<string | null>(null);
 
   const authHeaders = useCallback(
     (extra?: Record<string, string>): Record<string, string> => ({
@@ -396,6 +421,85 @@ function AdminPanel({
       // Si falla, el interruptor simplemente no cambia visualmente.
     } finally {
       setSavingSettings(null);
+    }
+  }
+
+  const loadAdminKeys = useCallback(async () => {
+    setLoadingAdminKeys(true);
+    setAdminKeysError(null);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/adminkeys", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => []);
+      if (!res.ok) setAdminKeysError(`Error ${res.status}`);
+      else setAdminKeys(Array.isArray(data) ? data : []);
+    } catch {
+      setAdminKeysError("No se pudo cargar la lista.");
+    } finally {
+      setLoadingAdminKeys(false);
+    }
+  }, [authHeaders, onUnauthorized]);
+
+  useEffect(() => {
+    loadAdminKeys();
+  }, [loadAdminKeys]);
+
+  async function onCreateAdminKey(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newAdminName.trim()) return;
+    setCreatingAdminKey(true);
+    setLastCreatedKey(null);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/adminkeys", {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ name: newAdminName.trim() }),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      if (res.ok && data) {
+        setLastCreatedKey(data.key);
+        setNewAdminName("");
+        loadAdminKeys();
+        loadAuditLog();
+      }
+    } catch {
+      // Si falla, simplemente no se crea nada visible.
+    } finally {
+      setCreatingAdminKey(false);
+    }
+  }
+
+  async function revokeAdminKey(id: string) {
+    const confirmed = window.confirm("¿Revocar el acceso de este administrador?");
+    if (!confirmed) return;
+
+    setRevokingAdminKey(id);
+    try {
+      const res = await fetch(`https://api.bnotifier.es/admin/adminkeys/${id}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      if (res.ok) {
+        setAdminKeys((prev) => prev.filter((k) => k._id !== id));
+        loadAuditLog();
+      }
+    } catch {
+      // Si falla, la lista simplemente no cambia.
+    } finally {
+      setRevokingAdminKey(null);
     }
   }
 
@@ -1072,6 +1176,98 @@ function AdminPanel({
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="admins-heading" className="surface-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 id="admins-heading" className="font-display text-lg font-semibold">
+            Administradores
+          </h2>
+          <button
+            onClick={loadAdminKeys}
+            className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            ↻ Recargar
+          </button>
+        </div>
+        {loadingAdminKeys ? (
+          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+        ) : adminKeysError ? (
+          <p className="py-10 text-center text-destructive">{adminKeysError}</p>
+        ) : adminKeys.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">
+            Solo tú (con la clave maestra) tienes acceso por ahora.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <caption className="sr-only">Lista de administradores adicionales</caption>
+              <thead>
+                <tr className="border-b border-border">
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Nombre</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">Creado</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
+                </tr>
+              </thead>
+              <tbody className="font-mono">
+                {adminKeys.map((k) => (
+                  <tr key={k._id} className="border-b border-border/60 last:border-0 hover:bg-surface-2/50">
+                    <td className="px-5 py-3.5">{k.name}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">
+                      {k.date ? new Date(k.date).toLocaleString() : "—"}
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => revokeAdminKey(k._id)}
+                        disabled={revokingAdminKey === k._id}
+                        className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
+                      >
+                        {revokingAdminKey === k._id ? "…" : "Revocar"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="border-t border-border p-6 md:p-8">
+          <h3 className="font-display text-base font-semibold">Añadir administrador</h3>
+          {lastCreatedKey && (
+            <div className="mt-4 rounded-lg border border-[color:var(--success)]/40 bg-[color:var(--success)]/10 p-4">
+              <div className="mono-label" style={{ color: "var(--success)" }}>
+                Clave generada — cópiala ahora, no se volverá a mostrar
+              </div>
+              <div className="mt-2 break-all rounded border border-border bg-surface-2/50 p-3 font-mono text-sm">
+                {lastCreatedKey}
+              </div>
+            </div>
+          )}
+          <form onSubmit={onCreateAdminKey} className="mt-5 flex flex-wrap items-end gap-3">
+            <div className="flex-1">
+              <label htmlFor="adminname" className="mono-label mb-2 block">
+                Nombre
+              </label>
+              <input
+                id="adminname"
+                required
+                value={newAdminName}
+                onChange={(e) => setNewAdminName(e.target.value)}
+                placeholder="Ej. Alex"
+                className="field focus:[&]:field-focus"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={creatingAdminKey}
+              className="btn-primary hover:[&]:btn-primary-hover disabled:opacity-50"
+            >
+              {creatingAdminKey ? "…" : "Crear →"}
+            </button>
+          </form>
+        </div>
       </section>
     </div>
   );
