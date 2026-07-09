@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ServerStatusBadge } from "./ServerStatusBadge";
+import { SystemStatus } from "./SystemStatus";
 
 function LogoMark({ className = "" }: { className?: string }) {
   return (
@@ -77,6 +78,9 @@ export function Layout({ children }: { children: ReactNode }) {
             Términos y aviso legal
           </Link>
         </p>
+        <div className="mt-2 flex items-center justify-center">
+          <SystemStatus />
+        </div>
       </footer>
     </div>
   );
