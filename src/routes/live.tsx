@@ -80,7 +80,7 @@ function LiveFeed() {
 
   async function loadInitial() {
     try {
-      const res = await fetch("https://api.bnotifier.es/archimonstruos");
+      const res = await fetch("https://api.bnotifier.es/stats");
       const data = await res.json().catch(() => []);
       if (!res.ok) {
         setError(`Error ${res.status}`);
