@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 
 export const Route = createFileRoute("/live")({
@@ -23,11 +23,13 @@ type ArchimonstruoActivo = {
   imageUrl: string;
 };
 
-const REFRESH_MS = 30_000;
 // Espacios visibles en la cuadrícula. Al aparecer uno nuevo y no caber más,
 // el más antiguo se cae de la vista (aunque siga activo en la base de datos
 // hasta que se cumplan sus 30 minutos reales).
 const MAX_VISIBLE = 12;
+// Refresco de respaldo, solo por si la conexión en tiempo real se corta y
+// tarda en reconectar. Lo normal es que los nuevos lleguen al instante.
+const FALLBACK_REFRESH_MS = 120_000;
 
 function formatElapsed(msSince: number): string {
   const totalSeconds = Math.max(0, Math.floor(msSince / 1000));
@@ -56,8 +58,19 @@ function LiveFeed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  const [live, setLive] = useState(false);
+  const itemsRef = useRef<ArchimonstruoActivo[]>([]);
 
-  async function load() {
+  function mergeSorted(list: ArchimonstruoActivo[]) {
+    const sorted = [...list].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+    const limited = sorted.slice(0, MAX_VISIBLE);
+    itemsRef.current = limited;
+    setItems(limited);
+  }
+
+  async function loadInitial() {
     try {
       const res = await fetch("https://api.bnotifier.es/archimonstruos");
       const data = await res.json().catch(() => []);
@@ -65,12 +78,7 @@ function LiveFeed() {
         setError(`Error ${res.status}`);
       } else {
         setError(null);
-        const list: ArchimonstruoActivo[] = Array.isArray(data) ? data : [];
-        // Más nuevo primero, y solo los que caben en la cuadrícula.
-        const sorted = [...list].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        );
-        setItems(sorted.slice(0, MAX_VISIBLE));
+        mergeSorted(Array.isArray(data) ? data : []);
       }
     } catch {
       setError("No se pudo conectar con el servidor.");
@@ -79,14 +87,38 @@ function LiveFeed() {
     }
   }
 
+  // Reloj para que "Apareció hace Xs" se actualice solo, cada segundo.
   useEffect(() => {
-    load();
-    const refreshId = setInterval(load, REFRESH_MS);
     const tickId = setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      clearInterval(refreshId);
-      clearInterval(tickId);
+    return () => clearInterval(tickId);
+  }, []);
+
+  // Carga inicial + refresco de respaldo (por si SSE se cae un rato).
+  useEffect(() => {
+    loadInitial();
+    const fallbackId = setInterval(loadInitial, FALLBACK_REFRESH_MS);
+    return () => clearInterval(fallbackId);
+  }, []);
+
+  // Conexión en tiempo real: el backend empuja cada archimonstruo nuevo
+  // apenas se registra, sin que tengamos que preguntar nosotros.
+  useEffect(() => {
+    const source = new EventSource("https://api.bnotifier.es/events");
+
+    source.onopen = () => setLive(true);
+    source.onerror = () => setLive(false);
+
+    source.onmessage = (event) => {
+      try {
+        const incoming: ArchimonstruoActivo = JSON.parse(event.data);
+        const withoutDuplicate = itemsRef.current.filter((a) => a.id !== incoming.id);
+        mergeSorted([incoming, ...withoutDuplicate]);
+      } catch {
+        // Mensaje no reconocido, se ignora.
+      }
     };
+
+    return () => source.close();
   }, []);
 
   return (
@@ -94,15 +126,15 @@ function LiveFeed() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="mono-label flex items-center gap-2">
-            <span className="live-dot" aria-hidden="true" />
-            En vivo
+            <span className={live ? "live-dot" : "live-dot opacity-30"} aria-hidden="true" />
+            {live ? "En vivo" : "Conectando…"}
           </span>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight">
             Archimonstruos activos
           </h1>
           <p className="mt-2 max-w-prose text-sm text-muted-foreground">
-            Se actualiza solo cada 30 segundos. Toca uno para introducir tu
-            licencia y revelar su posición exacta.
+            Aparecen aquí al instante en cuanto se registran. Toca uno para
+            introducir tu licencia y revelar su posición exacta.
           </p>
         </div>
       </div>
@@ -120,7 +152,7 @@ function LiveFeed() {
           <p className="text-muted-foreground">
             No hay archimonstruos activos ahora mismo.
           </p>
-          <p className="mono-label mt-2">Vuelve a mirar en un rato.</p>
+          <p className="mono-label mt-2">Aparecerán aquí solos, sin recargar.</p>
         </div>
       )}
 
