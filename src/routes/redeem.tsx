@@ -32,6 +32,7 @@ function RedeemPage() {
 function RedeemForm() {
   const [code, setCode] = useState("");
   const [pcId, setPcId] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot — debe quedar vacío
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RedeemResult | null>(null);
@@ -45,7 +46,7 @@ function RedeemForm() {
       const res = await fetch("https://api.bnotifier.es/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, pc_id: pcId }),
+        body: JSON.stringify({ code, pc_id: pcId, website }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -118,6 +119,20 @@ function RedeemForm() {
             </div>
           )}
           <form onSubmit={onSubmit} className="space-y-5">
+            {/* Honeypot: invisible y sin foco para humanos; los bots
+                automatizados suelen rellenarlo igualmente. */}
+            <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-0 w-0 overflow-hidden">
+              <label htmlFor="website">No rellenar este campo</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </div>
             <div>
               <label htmlFor="code" className="mono-label mb-2 block">
                 Código promocional
