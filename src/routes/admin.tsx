@@ -224,6 +224,7 @@ function AdminPanel({
   const [adminKeys, setAdminKeys] = useState<AdminKeyItem[]>([]);
   const [loadingAdminKeys, setLoadingAdminKeys] = useState(true);
   const [adminKeysError, setAdminKeysError] = useState<string | null>(null);
+  const [isPrimaryAdmin, setIsPrimaryAdmin] = useState(true);
   const [newAdminName, setNewAdminName] = useState("");
   const [creatingAdminKey, setCreatingAdminKey] = useState(false);
   const [revokingAdminKey, setRevokingAdminKey] = useState<string | null>(null);
@@ -433,6 +434,11 @@ function AdminPanel({
       });
       if (res.status === 401) {
         onUnauthorized();
+        return;
+      }
+      if (res.status === 403) {
+        // No eres el admin principal: esta sección simplemente no existe para ti.
+        setIsPrimaryAdmin(false);
         return;
       }
       const data = await res.json().catch(() => []);
@@ -1178,7 +1184,9 @@ function AdminPanel({
         )}
       </section>
 
-      <section aria-labelledby="admins-heading" className="surface-card overflow-hidden">
+      <section aria-labelledby="admins-heading" className="surface-card overflow-hidden" hidden={!isPrimaryAdmin}>
+        {isPrimaryAdmin && (
+          <>
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 id="admins-heading" className="font-display text-lg font-semibold">
             Administradores
@@ -1268,6 +1276,8 @@ function AdminPanel({
             </button>
           </form>
         </div>
+          </>
+        )}
       </section>
     </div>
   );
