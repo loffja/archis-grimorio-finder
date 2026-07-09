@@ -42,6 +42,35 @@ type PromoCodeItem = {
   date?: string;
 };
 
+type AuditEntry = {
+  action: string;
+  details?: Record<string, unknown>;
+  date: string;
+};
+
+const ACTION_LABELS: Record<string, string> = {
+  licencia_creada: "Licencia creada",
+  licencia_eliminada: "Licencia eliminada",
+  codigo_creado: "Código promocional creado",
+  codigo_eliminado: "Código promocional eliminado",
+};
+
+function formatAuditDetails(entry: AuditEntry): string {
+  const d = entry.details || {};
+  switch (entry.action) {
+    case "licencia_creada":
+      return `${d.licencia ?? "?"} · PC ID: ${d.pc_id ?? "?"}`;
+    case "licencia_eliminada":
+      return `${d.licencia ?? "?"}`;
+    case "codigo_creado":
+      return `${d.code ?? "?"} · máx. ${d.maxUses ?? "?"} usos`;
+    case "codigo_eliminado":
+      return `${d.code ?? "?"}`;
+    default:
+      return JSON.stringify(d);
+  }
+}
+
 const STORAGE_KEY = "admin-key";
 
 function generateLicenseKey(): string {
@@ -161,6 +190,10 @@ function AdminPanel({
   const [promoSubmitting, setPromoSubmitting] = useState(false);
   const [promoFeedback, setPromoFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deletingCode, setDeletingCode] = useState<string | null>(null);
+
+  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(true);
+  const [auditError, setAuditError] = useState<string | null>(null);
 
   const authHeaders = useCallback(
     (extra?: Record<string, string>): Record<string, string> => ({
@@ -283,6 +316,31 @@ function AdminPanel({
     loadPromoCodes();
   }, [loadPromoCodes]);
 
+  const loadAuditLog = useCallback(async () => {
+    setLoadingAudit(true);
+    setAuditError(null);
+    try {
+      const res = await fetch("https://api.bnotifier.es/admin/audit-log", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => []);
+      if (!res.ok) setAuditError(`Error ${res.status}`);
+      else setAuditLog(Array.isArray(data) ? data : []);
+    } catch {
+      setAuditError("No se pudo cargar el registro.");
+    } finally {
+      setLoadingAudit(false);
+    }
+  }, [authHeaders, onUnauthorized]);
+
+  useEffect(() => {
+    loadAuditLog();
+  }, [loadAuditLog]);
+
   async function onCreatePromo(e: React.FormEvent) {
     e.preventDefault();
     setPromoSubmitting(true);
@@ -315,6 +373,7 @@ function AdminPanel({
         setPromoDurationValue("");
         setMaxUses("1");
         loadPromoCodes();
+        loadAuditLog();
       }
     } catch {
       setPromoFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
@@ -343,6 +402,7 @@ function AdminPanel({
       } else {
         setPromoCodes((prev) => prev.filter((p) => p.code !== code));
         setPromoFeedback({ type: "ok", text: data?.message || "Código eliminado." });
+        loadAuditLog();
       }
     } catch {
       setPromoFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
@@ -380,6 +440,7 @@ function AdminPanel({
         setNewLic("");
         setDurationValue("");
         loadLicencias();
+        loadAuditLog();
       }
     } catch {
       setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
@@ -410,6 +471,7 @@ function AdminPanel({
       } else {
         setLicencias((prev) => prev.filter((l) => l.licencia !== licencia));
         setFeedback({ type: "ok", text: data?.message || "Licencia eliminada." });
+        loadAuditLog();
       }
     } catch {
       setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
@@ -859,6 +921,45 @@ function AdminPanel({
             </div>
           </form>
         </div>
+      </section>
+
+      <section aria-labelledby="audit-heading" className="surface-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 id="audit-heading" className="font-display text-lg font-semibold">
+            Registro de actividad
+          </h2>
+          <button
+            onClick={loadAuditLog}
+            className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            ↻ Recargar
+          </button>
+        </div>
+        {loadingAudit ? (
+          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+        ) : auditError ? (
+          <p className="py-10 text-center text-destructive">{auditError}</p>
+        ) : auditLog.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">Sin actividad todavía.</p>
+        ) : (
+          <ul role="list" className="max-h-96 divide-y divide-border/60 overflow-y-auto">
+            {auditLog.map((entry, i) => (
+              <li key={i} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div>
+                  <span className="font-mono text-sm">
+                    {ACTION_LABELS[entry.action] || entry.action}
+                  </span>
+                  <div className="mono-label mt-0.5 text-[0.65rem] text-muted-foreground">
+                    {formatAuditDetails(entry)}
+                  </div>
+                </div>
+                <span className="mono-label shrink-0 text-[0.65rem] text-muted-foreground">
+                  {new Date(entry.date).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
