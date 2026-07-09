@@ -19,10 +19,29 @@ type ArchimonstruoActivo = {
   id: number;
   name: string;
   server: string;
+  date: string;
   imageUrl: string;
 };
 
 const REFRESH_MS = 30_000;
+// Espacios visibles en la cuadrícula. Al aparecer uno nuevo y no caber más,
+// el más antiguo se cae de la vista (aunque siga activo en la base de datos
+// hasta que se cumplan sus 30 minutos reales).
+const MAX_VISIBLE = 12;
+
+function formatElapsed(msSince: number): string {
+  const totalSeconds = Math.max(0, Math.floor(msSince / 1000));
+  if (totalSeconds < 60) {
+    return `Apareció hace ${totalSeconds}s`;
+  }
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  if (totalMinutes < 60) {
+    return `Apareció hace ${totalMinutes} min`;
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `Apareció hace ${hours}h ${minutes}min`;
+}
 
 function LivePage() {
   return (
@@ -36,6 +55,7 @@ function LiveFeed() {
   const [items, setItems] = useState<ArchimonstruoActivo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   async function load() {
     try {
@@ -45,7 +65,12 @@ function LiveFeed() {
         setError(`Error ${res.status}`);
       } else {
         setError(null);
-        setItems(Array.isArray(data) ? data : []);
+        const list: ArchimonstruoActivo[] = Array.isArray(data) ? data : [];
+        // Más nuevo primero, y solo los que caben en la cuadrícula.
+        const sorted = [...list].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+        setItems(sorted.slice(0, MAX_VISIBLE));
       }
     } catch {
       setError("No se pudo conectar con el servidor.");
@@ -56,8 +81,12 @@ function LiveFeed() {
 
   useEffect(() => {
     load();
-    const id = setInterval(load, REFRESH_MS);
-    return () => clearInterval(id);
+    const refreshId = setInterval(load, REFRESH_MS);
+    const tickId = setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      clearInterval(refreshId);
+      clearInterval(tickId);
+    };
   }, []);
 
   return (
@@ -100,28 +129,36 @@ function LiveFeed() {
           role="list"
           className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4"
         >
-          {items.map((a) => (
-            <li key={a.id}>
-              <Link
-                to="/position/$id"
-                params={{ id: String(a.id) }}
-                className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-4 text-center transition-colors hover:border-primary/60 hover:bg-surface-2 focus-visible:border-primary focus-visible:outline-none"
-              >
-                <img
-                  src={a.imageUrl}
-                  alt={a.name}
-                  loading="lazy"
-                  className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
-                />
-                <span className="font-display text-sm font-semibold leading-tight">
-                  {a.name}
-                </span>
-                <span className="mono-label text-[0.65rem] text-muted-foreground">
-                  {a.server}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {items.map((a) => {
+            const registeredAt = new Date(a.date).getTime();
+            const elapsedMs = now - registeredAt;
+
+            return (
+              <li key={a.id}>
+                <Link
+                  to="/position/$id"
+                  params={{ id: String(a.id) }}
+                  className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-4 text-center transition-colors hover:border-primary/60 hover:bg-surface-2 focus-visible:border-primary focus-visible:outline-none"
+                >
+                  <img
+                    src={a.imageUrl}
+                    alt={a.name}
+                    loading="lazy"
+                    className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
+                  />
+                  <span className="font-display text-sm font-semibold leading-tight">
+                    {a.name}
+                  </span>
+                  <span className="mono-label text-[0.65rem] text-muted-foreground">
+                    {a.server}
+                  </span>
+                  <span className="mono-label rounded-full border border-primary/30 px-2.5 py-0.5 text-[0.65rem] text-primary">
+                    {formatElapsed(elapsedMs)}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
