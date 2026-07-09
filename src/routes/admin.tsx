@@ -34,6 +34,13 @@ type ArchimonstruoActivo = {
 
 const STORAGE_KEY = "admin-key";
 
+function generateLicenseKey(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin caracteres ambiguos (0/O, 1/I)
+  const group = () =>
+    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `${group()}-${group()}-${group()}`;
+}
+
 function AdminPage() {
   const [adminKey, setAdminKey] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -121,6 +128,7 @@ function AdminPanel({
 
   const [pcId, setPcId] = useState("");
   const [newLic, setNewLic] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [durationValue, setDurationValue] = useState("");
   const [durationUnit, setDurationUnit] = useState<DurationUnit>("days");
   const [submitting, setSubmitting] = useState(false);
@@ -301,6 +309,12 @@ function AdminPanel({
     0,
   );
 
+  const filteredLicencias = licencias.filter((l) => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return l.pc_id.toLowerCase().includes(q) || l.licencia.toLowerCase().includes(q);
+  });
+
   return (
     <div className="w-full max-w-6xl space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -328,16 +342,26 @@ function AdminPanel({
       </div>
 
       <section aria-labelledby="licenses-heading" className="surface-card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
           <h2 id="licenses-heading" className="font-display text-lg font-semibold">
             Registered licenses
           </h2>
-          <button
-            onClick={loadLicencias}
-            className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
-          >
-            ↻ Recargar
-          </button>
+          <div className="flex items-center gap-3">
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar por PC ID o licencia…"
+              aria-label="Buscar licencias"
+              className="field focus:[&]:field-focus h-8 w-48 text-sm"
+            />
+            <button
+              onClick={loadLicencias}
+              className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
+            >
+              ↻ Recargar
+            </button>
+          </div>
         </div>
         {loading ? (
           <p className="py-10 text-center text-muted-foreground">Cargando…</p>
@@ -345,6 +369,10 @@ function AdminPanel({
           <p className="py-10 text-center text-destructive">{loadError}</p>
         ) : licencias.length === 0 ? (
           <p className="py-10 text-center text-muted-foreground">Sin licencias.</p>
+        ) : filteredLicencias.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">
+            Ninguna licencia coincide con "{searchQuery}".
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -360,7 +388,7 @@ function AdminPanel({
                 </tr>
               </thead>
               <tbody className="font-mono">
-                {licencias.map((l, i) => {
+                {filteredLicencias.map((l, i) => {
                   const created = l.createdAt || l.created_at;
                   const uses = Array.isArray(l.usedFor) ? l.usedFor.length : 0;
                   const expiresAt = l.expiresAt ?? null;
@@ -450,13 +478,22 @@ function AdminPanel({
             <label htmlFor="newlic" className="mono-label mb-2 block">
               Nueva licencia
             </label>
-            <input
-              id="newlic"
-              required
-              value={newLic}
-              onChange={(e) => setNewLic(e.target.value)}
-              className="field focus:[&]:field-focus"
-            />
+            <div className="flex gap-2">
+              <input
+                id="newlic"
+                required
+                value={newLic}
+                onChange={(e) => setNewLic(e.target.value)}
+                className="field focus:[&]:field-focus flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setNewLic(generateLicenseKey())}
+                className="mono-label rounded border border-border px-3 text-[0.7rem] transition-colors hover:border-primary/60 hover:text-primary"
+              >
+                Generar
+              </button>
+            </div>
           </div>
           <div>
             <label htmlFor="duration" className="mono-label mb-2 block">
