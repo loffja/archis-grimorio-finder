@@ -72,14 +72,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL },
-      { property: "og:image", content: `${SITE_URL}/dakubot-icon.png` },
+      { property: "og:image", content: `${SITE_URL}/og-image.PNG` },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "DakuBot — Rastreador de archimonstruos de Dofus Touch" },
       {
         name: "twitter:description",
         content: "Posiciones de archimonstruos en tiempo real para Dofus Touch.",
       },
-      { name: "twitter:image", content: `${SITE_URL}/dakubot-icon.png` },
+      { name: "twitter:image", content: `${SITE_URL}/og-image.PNG` },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
