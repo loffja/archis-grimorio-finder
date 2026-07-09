@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /position/
+
+Sitemap: https://www.bnotifier.es/sitemap.xml
