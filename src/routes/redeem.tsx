@@ -33,6 +33,7 @@ function RedeemForm() {
   const [code, setCode] = useState("");
   const [pcId, setPcId] = useState("");
   const [website, setWebsite] = useState(""); // honeypot — debe quedar vacío
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RedeemResult | null>(null);
@@ -46,7 +47,7 @@ function RedeemForm() {
       const res = await fetch("https://api.bnotifier.es/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, pc_id: pcId, website }),
+        body: JSON.stringify({ code, pc_id: pcId, website, referralCode: referralCode.trim() || undefined }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -161,6 +162,23 @@ function RedeemForm() {
                 onChange={(e) => setPcId(e.target.value)}
                 className="field focus:[&]:field-focus"
               />
+            </div>
+            <div>
+              <label htmlFor="referralcode" className="mono-label mb-2 block">
+                Código de referido (opcional)
+              </label>
+              <input
+                id="referralcode"
+                type="text"
+                autoComplete="off"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                placeholder="REF-XXXXXX"
+                className="field focus:[&]:field-focus"
+              />
+              <p className="mono-label mt-2 text-muted-foreground">
+                ¿Alguien te invitó? Pon su código aquí.
+              </p>
             </div>
             <button
               type="submit"
