@@ -17,9 +17,9 @@ function LogoMark({ className = "" }: { className?: string }) {
 
 const NAV_LINKS = [
   { to: "/live", label: "LIVE" },
-  { to: "/redeem", label: "REDEEM" },
   { to: "/price", label: "PRICING" },
   { to: "/join", label: "DISCORD" },
+  { to: "/redeem", label: "REDEEM" },
 ] as const;
 
 function NavMenu() {
