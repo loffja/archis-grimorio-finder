@@ -1054,7 +1054,7 @@ function AdminPanel({
               className="field focus:[&]:field-focus"
             />
             <p className="mono-label mt-2 text-muted-foreground">
-              Si te dijo quién lo invitó, ponlo aquí — le suma +2 días a esa licencia.
+             Si te dijo quién lo invitó, ponlo aquí — le suma +1 día a esa licencia.
             </p>
           </div>
           <div className="flex items-end md:justify-end">
