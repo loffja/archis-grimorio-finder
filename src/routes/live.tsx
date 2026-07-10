@@ -524,7 +524,7 @@ function LiveFeed() {
                     loading="lazy"
                     className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
                   />
-                  <span className="font-display text-sm font-semibold leading-tight">
+                  <span className="flex min-h-[3.2rem] items-center justify-center font-display text-sm font-semibold leading-tight">
                     {a.name}
                   </span>
                   <span className="mono-label text-[0.65rem] text-muted-foreground">
@@ -562,7 +562,7 @@ function LiveFeed() {
                     loading="lazy"
                     className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
                   />
-                  <span className="font-display text-sm font-semibold leading-tight">
+                  <span className="flex min-h-[3.2rem] items-center justify-center font-display text-sm font-semibold leading-tight">
                     {a.name}
                   </span>
                   <span className="mono-label text-[0.65rem] text-muted-foreground">
