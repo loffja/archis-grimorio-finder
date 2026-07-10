@@ -123,18 +123,20 @@ function Index() {
 
         <DofusRadar />
 
-        <div id="how" className="mt-6 grid gap-3 md:grid-cols-3">
-          {[
-            { k: "01", t: "Explora", d: "Mira en LIVE qué archimonstruos están activos ahora mismo." },
-            { k: "02", t: "Consigue tu clave", d: "Únete a Discord o canjea un código en REDEEM." },
-            { k: "03", t: "Revela", d: "Recibe posición, servidor y nombre al instante." },
-          ].map((s) => (
-            <div key={s.k} className="surface-card p-4">
-              <div className="mono-label">{s.k}</div>
-              <div className="mt-1 font-display text-base font-semibold">{s.t}</div>
-              <p className="mt-1 text-xs text-muted-foreground md:text-sm">{s.d}</p>
-            </div>
-          ))}
+        <div className="surface-card mt-6 p-5 text-center">
+          <div className="mono-label">Desde</div>
+          <div className="font-display text-2xl font-semibold text-primary">
+            $6 USD<span className="text-sm font-normal text-muted-foreground">/día</span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            El plan mensual es tu mejor precio por día.
+          </p>
+          <Link
+            to="/price"
+            className="mono-label mt-3 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/70"
+          >
+            Ver todos los planes →
+          </Link>
         </div>
         <div className="mt-3 text-center">
           <Link
