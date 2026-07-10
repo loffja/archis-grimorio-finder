@@ -65,6 +65,7 @@ const ACTION_LABELS: Record<string, string> = {
   ajustes_actualizados: "Interruptor cambiado",
   admin_creado: "Administrador añadido",
   admin_revocado: "Administrador revocado",
+  referido_recompensado: "Referido premiado (+2 días)",
 };
 
 function formatAuditDetails(entry: AuditEntry): string {
@@ -86,6 +87,8 @@ function formatAuditDetails(entry: AuditEntry): string {
     case "admin_creado":
     case "admin_revocado":
       return `${d.name ?? "?"}${by}`;
+    case "referido_recompensado":
+      return `${d.referrerPcId ?? "?"} referido por: ${d.nuevoPcId ?? "?"} · código ${d.referralCode ?? "?"}`;
     case "ajustes_actualizados":
       return (
         Object.entries(d)
@@ -196,6 +199,7 @@ function AdminPanel({
   const [newLic, setNewLic] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [durationValue, setDurationValue] = useState("");
+  const [referralCodeInput, setReferralCodeInput] = useState("");
   const [durationUnit, setDurationUnit] = useState<DurationUnit>("days");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -599,6 +603,9 @@ function AdminPanel({
         body.durationValue = Number(trimmedDuration);
         body.durationUnit = durationUnit;
       }
+      if (referralCodeInput.trim() !== "") {
+        body.referralCode = referralCodeInput.trim();
+      }
       const res = await fetch("https://api.bnotifier.es/registerLicencia", {
         method: "POST",
         headers: authHeaders({ "Content-Type": "application/json" }),
@@ -616,6 +623,7 @@ function AdminPanel({
         setPcId("");
         setNewLic("");
         setDurationValue("");
+        setReferralCodeInput("");
         loadLicencias();
         loadAuditLog();
       }
@@ -1032,6 +1040,21 @@ function AdminPanel({
             </div>
             <p className="mono-label mt-2 text-muted-foreground">
               Vacío = licencia permanente
+            </p>
+          </div>
+          <div>
+            <label htmlFor="referral-input" className="mono-label mb-2 block">
+              Código de referido (opcional)
+            </label>
+            <input
+              id="referral-input"
+              value={referralCodeInput}
+              onChange={(e) => setReferralCodeInput(e.target.value)}
+              placeholder="REF-XXXXXX"
+              className="field focus:[&]:field-focus"
+            />
+            <p className="mono-label mt-2 text-muted-foreground">
+              Si te dijo quién lo invitó, ponlo aquí — le suma +2 días a esa licencia.
             </p>
           </div>
           <div className="flex items-end md:justify-end">
