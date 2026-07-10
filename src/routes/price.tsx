@@ -30,7 +30,7 @@ const PLANS = [
     usd: "14",
     eur: "12",
     tag: null,
-    savings: "Ahorras 67% vs. pagar el diario 7 veces",
+    savings: "Ahorras un 67%",
     blurb: "Cubre un fin de semana largo o una semana completa de farmeo.",
   },
   {
@@ -39,7 +39,7 @@ const PLANS = [
     usd: "32",
     eur: "28",
     tag: "Mejor precio",
-    savings: "Ahorras 82% vs. pagar el diario 30 veces",
+    savings: "Ahorras un 82%",
     blurb: "El mejor precio por día. Tiempo de sobra para terminar el Ocre sin prisa.",
   },
 ];
