@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 
@@ -183,6 +183,12 @@ function PositionPage() {
                     {referralCopied ? "¡Copiado!" : "Copiar"}
                   </button>
                 </div>
+                <Link
+                  to="/referral"
+                  className="mono-label mt-3 inline-block text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Cómo funciona →
+                </Link>
               </div>
             )}
             {result.message && (
