@@ -158,10 +158,10 @@ function PositionPage() {
             </div>
             {result.referralCode && (
               <div className="border-t border-border p-5 text-center">
-                <div className="mono-label text-primary">Invita y gana +2 días</div>
+                <div className="mono-label text-primary">Invita y gana +1 día</div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Comparte tu código. Cuando alguien nuevo lo use al registrarse, tu licencia
-                  gana 2 días extra.
+                 Comparte tu código. Cuando alguien nuevo lo use al registrarse, tu licencia
+                  gana 1 día extra.
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-2">
                   <span className="rounded-lg border border-border bg-surface-2/50 px-3 py-1.5 font-mono text-sm">
