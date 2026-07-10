@@ -91,6 +91,11 @@ function Index() {
           <span className="badge-dot">
             <span className="live-dot" aria-hidden="true" /> Dofus Touch · Posiciones en vivo
           </span>
+          <div className="mt-2">
+            <span className="mono-label rounded-full border border-primary/40 px-3 py-1 text-primary">
+              100% de cobertura del Ocre
+            </span>
+          </div>
           <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
             Caza cada <span className="text-gradient">archimonstruo</span>
             <br className="hidden sm:block" /> antes de que huya.
