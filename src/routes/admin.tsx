@@ -65,7 +65,7 @@ const ACTION_LABELS: Record<string, string> = {
   ajustes_actualizados: "Interruptor cambiado",
   admin_creado: "Administrador añadido",
   admin_revocado: "Administrador revocado",
-  referido_recompensado: "Referido premiado (+2 días)",
+  referido_recompensado: "Referido premiado (+1 día)",
 };
 
 function formatAuditDetails(entry: AuditEntry): string {
