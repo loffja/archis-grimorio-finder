@@ -21,6 +21,7 @@ const PLANS = [
     usd: "6",
     eur: "5",
     tag: null,
+    savings: null,
     blurb: "Para probar el servicio o una sesión intensiva puntual.",
   },
   {
@@ -29,6 +30,7 @@ const PLANS = [
     usd: "14",
     eur: "12",
     tag: null,
+    savings: "Ahorras 67% vs. pagar el diario 7 veces",
     blurb: "Cubre un fin de semana largo o una semana completa de farmeo.",
   },
   {
@@ -37,6 +39,7 @@ const PLANS = [
     usd: "32",
     eur: "28",
     tag: "Mejor precio",
+    savings: "Ahorras 82% vs. pagar el diario 30 veces",
     blurb: "El mejor precio por día. Tiempo de sobra para terminar el Ocre sin prisa.",
   },
 ];
@@ -110,6 +113,11 @@ function PricePage() {
                 </div>
               </div>
               <p className="mt-4 flex-1 text-center text-sm text-muted-foreground">{p.blurb}</p>
+              {p.savings && (
+                <div className="mono-label mt-3 text-center text-[0.65rem] text-[color:var(--success)]">
+                  {p.savings}
+                </div>
+              )}
               <Link
                 to="/join"
                 className="btn-primary mt-5 w-full justify-center hover:[&]:btn-primary-hover"
