@@ -501,8 +501,7 @@ function LiveFeed() {
           <div className="surface-card border-primary/30 px-5 py-4 text-center">
             <span className="mono-label text-primary">🔧 Vista previa</span>
             <p className="mt-1 text-sm text-muted-foreground">
-              Así se ve LIVE cuando el bot está activo. Los archimonstruos de abajo son de ejemplo
-              — toca cualquiera para ver los precios.
+              Así se ve LIVE cuando el bot está activo. Los archimonstruos de abajo son de ejemplo.
             </p>
           </div>
           <ul
@@ -531,7 +530,7 @@ function LiveFeed() {
                     Blair
                   </span>
                   <span className="mono-label rounded-full border border-primary/30 px-2.5 py-0.5 text-[0.65rem] text-primary">
-                    Ver precios →
+                    Ver posición →
                   </span>
                 </Link>
               </li>
