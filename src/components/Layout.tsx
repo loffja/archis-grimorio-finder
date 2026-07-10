@@ -20,11 +20,13 @@ const NAV_LINKS = [
   { to: "/price", label: "PRICING" },
   { to: "/join", label: "DISCORD" },
   { to: "/redeem", label: "REDEEM" },
+  { to: "/referral", label: "REFERRAL" },
+  { to: "/my-license", label: "MY LICENSE" },
 ] as const;
 
 function NavMenu() {
   return (
-    <nav aria-label="Principal" className="flex items-center gap-5">
+    <nav aria-label="Principal" className="flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
       {NAV_LINKS.map((link) => (
         <Link
           key={link.to}
