@@ -38,6 +38,22 @@ const MAX_VISIBLE = 12;
 const FALLBACK_REFRESH_MS = 120_000;
 const STATS_REFRESH_MS = 60_000;
 
+// Se muestra SOLO cuando todavía no hay archimonstruos reales activos (es
+// decir, mientras el bot no esté corriendo de verdad). En cuanto llegue el
+// primer dato real, este bloque deja de mostrarse solo — no hay que
+// desactivarlo a mano.
+const DEMO_ITEMS = [
+  { id: 2544, name: "Archimonstruo de ejemplo", server: "Blair" },
+  { id: 2389, name: "Archimonstruo de ejemplo", server: "Blair" },
+  { id: 2400, name: "Archimonstruo de ejemplo", server: "Blair" },
+  { id: 2416, name: "Archimonstruo de ejemplo", server: "Blair" },
+  { id: 2461, name: "Archimonstruo de ejemplo", server: "Blair" },
+  { id: 2494, name: "Archimonstruo de ejemplo", server: "Blair" },
+].map((a) => ({
+  ...a,
+  imageUrl: `https://raw.githubusercontent.com/Gianxaje/kkkal/main/imgBLUR/${a.id}.png`,
+}));
+
 function formatElapsed(msSince: number): string {
   const totalSeconds = Math.max(0, Math.floor(msSince / 1000));
   if (totalSeconds < 60) {
@@ -188,11 +204,46 @@ function LiveFeed() {
       )}
 
       {!loading && !error && items.length === 0 && (
-        <div className="surface-card py-16 text-center">
-          <p className="text-muted-foreground">
-            No hay archimonstruos activos ahora mismo.
-          </p>
-          <p className="mono-label mt-2">Aparecerán aquí solos, sin recargar.</p>
+        <div className="space-y-5">
+          <div className="surface-card border-primary/30 px-5 py-4 text-center">
+            <span className="mono-label text-primary">🔧 Vista previa</span>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Así se ve LIVE cuando el bot está activo. Los archimonstruos de abajo son de ejemplo
+              — toca cualquiera para ver los precios.
+            </p>
+          </div>
+          <ul
+            role="list"
+            className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4"
+          >
+            {DEMO_ITEMS.map((a) => (
+              <li key={a.id}>
+                <Link
+                  to="/price"
+                  className="group relative flex flex-col items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-4 text-center transition-colors hover:border-primary/60 hover:bg-surface-2 focus-visible:border-primary focus-visible:outline-none"
+                >
+                  <span className="mono-label absolute right-2 top-2 rounded-full border border-primary/50 bg-background/80 px-2 py-0.5 text-[0.55rem] text-primary">
+                    DEMO
+                  </span>
+                  <img
+                    src={a.imageUrl}
+                    alt=""
+                    loading="lazy"
+                    className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
+                  />
+                  <span className="font-display text-sm font-semibold leading-tight">
+                    {a.name}
+                  </span>
+                  <span className="mono-label text-[0.65rem] text-muted-foreground">
+                    {a.server}
+                  </span>
+                  <span className="mono-label rounded-full border border-primary/30 px-2.5 py-0.5 text-[0.65rem] text-primary">
+                    Ver precios →
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
