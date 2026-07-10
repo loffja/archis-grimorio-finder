@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Fragment, useEffect, useRef, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 
 export const Route = createFileRoute("/admin")({
@@ -59,6 +59,7 @@ type AdminKeyItem = {
 const ACTION_LABELS: Record<string, string> = {
   licencia_creada: "Licencia creada",
   licencia_eliminada: "Licencia eliminada",
+  licencia_extendida: "Licencia extendida",
   codigo_creado: "Código promocional creado",
   codigo_eliminado: "Código promocional eliminado",
   ajustes_actualizados: "Interruptor cambiado",
@@ -74,6 +75,10 @@ function formatAuditDetails(entry: AuditEntry): string {
       return `${d.licencia ?? "?"} · PC ID: ${d.pc_id ?? "?"}${by}`;
     case "licencia_eliminada":
       return `${d.licencia ?? "?"}${by}`;
+    case "licencia_extendida":
+      return `${d.licencia ?? "?"} · nueva caducidad: ${
+        d.expiresAt ? new Date(d.expiresAt as string).toLocaleString() : "?"
+      }${by}`;
     case "codigo_creado":
       return `${d.code ?? "?"} · máx. ${d.maxUses ?? "?"} usos${by}`;
     case "codigo_eliminado":
@@ -195,6 +200,10 @@ function AdminPanel({
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
+  const [extendingLicencia, setExtendingLicencia] = useState<string | null>(null);
+  const [extendValue, setExtendValue] = useState("");
+  const [extendUnit, setExtendUnit] = useState<DurationUnit>("days");
+  const [submittingExtend, setSubmittingExtend] = useState(false);
 
   const [archimonstruos, setArchimonstruos] = useState<ArchimonstruoActivo[]>([]);
   const [loadingArchis, setLoadingArchis] = useState(true);
@@ -648,6 +657,41 @@ function AdminPanel({
     }
   }
 
+  async function handleExtend(licencia: string) {
+    const value = extendValue.trim();
+    if (!value) return;
+
+    setSubmittingExtend(true);
+    try {
+      const res = await fetch(
+        `https://api.bnotifier.es/licencias/${encodeURIComponent(licencia)}/extend`,
+        {
+          method: "PUT",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ durationValue: Number(value), durationUnit: extendUnit }),
+        },
+      );
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
+      } else {
+        setFeedback({ type: "ok", text: data?.message || "Licencia extendida." });
+        setExtendingLicencia(null);
+        setExtendValue("");
+        loadLicencias();
+        loadAuditLog();
+      }
+    } catch {
+      setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+    } finally {
+      setSubmittingExtend(false);
+    }
+  }
+
   const totalUses = licencias.reduce(
     (sum, l) => sum + (Array.isArray(l.usedFor) ? l.usedFor.length : 0),
     0,
@@ -793,8 +837,8 @@ function AdminPanel({
                   const expiresDate = expiresAt ? new Date(expiresAt) : null;
                   const isExpired = expiresDate ? expiresDate.getTime() <= Date.now() : false;
                   return (
+                    <Fragment key={i}>
                     <tr
-                      key={i}
                       className="border-b border-border/60 last:border-0 hover:bg-surface-2/50"
                     >
                       <td className="px-5 py-3.5">{l.pc_id}</td>
@@ -818,16 +862,82 @@ function AdminPanel({
                         {expiresDate ? expiresDate.toLocaleString() : "Permanente"}
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(l.licencia)}
-                          disabled={deletingKey === l.licencia}
-                          className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
-                        >
-                          {deletingKey === l.licencia ? "…" : "Eliminar"}
-                        </button>
+                        <div className="flex items-center justify-end gap-3">
+                          {expiresDate && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setExtendingLicencia(
+                                  extendingLicencia === l.licencia ? null : l.licencia,
+                                );
+                                setExtendValue("");
+                              }}
+                              className="mono-label rounded text-primary transition-colors hover:text-primary/70"
+                            >
+                              Extender
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(l.licencia)}
+                            disabled={deletingKey === l.licencia}
+                            className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
+                          >
+                            {deletingKey === l.licencia ? "…" : "Eliminar"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
+                    {extendingLicencia === l.licencia && (
+                      <tr className="border-b border-border/60 bg-surface-2/30">
+                        <td colSpan={6} className="px-5 py-4">
+                          <div className="flex flex-wrap items-end gap-3">
+                            <div>
+                              <label className="mono-label mb-2 block">Añadir</label>
+                              <input
+                                type="number"
+                                min="1"
+                                autoFocus
+                                value={extendValue}
+                                onChange={(e) => setExtendValue(e.target.value)}
+                                placeholder="Ej. 7"
+                                className="field focus:[&]:field-focus w-28"
+                              />
+                            </div>
+                            <div>
+                              <label className="mono-label mb-2 block">Unidad</label>
+                              <select
+                                value={extendUnit}
+                                onChange={(e) => setExtendUnit(e.target.value as DurationUnit)}
+                                className="field focus:[&]:field-focus"
+                              >
+                                <option value="minutes">Minutos</option>
+                                <option value="hours">Horas</option>
+                                <option value="days">Días</option>
+                                <option value="weeks">Semanas</option>
+                                <option value="months">Meses</option>
+                              </select>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleExtend(l.licencia)}
+                              disabled={submittingExtend || !extendValue.trim()}
+                              className="btn-primary hover:[&]:btn-primary-hover disabled:opacity-50"
+                            >
+                              {submittingExtend ? "…" : "Confirmar →"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setExtendingLicencia(null)}
+                              className="mono-label rounded text-muted-foreground transition-colors hover:text-primary"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   );
                 })}
               </tbody>
