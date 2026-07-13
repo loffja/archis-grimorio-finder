@@ -304,7 +304,7 @@ const DEMO_POOL: { id: number; name: string }[] = [
   { id: 2286, name: "Zumburdieu el Social" },
 ];
 
-const DEMO_VISIBLE_COUNT = 6;
+const DEMO_VISIBLE_COUNT = 8;
 const DEMO_ROTATE_MS = 5000;
 
 function demoImageUrl(id: number) {
