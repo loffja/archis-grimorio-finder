@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LanguageProvider, useLanguage } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -56,18 +58,6 @@ type AdminKeyItem = {
   date?: string;
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  licencia_creada: "Licencia creada",
-  licencia_eliminada: "Licencia eliminada",
-  licencia_extendida: "Licencia extendida",
-  codigo_creado: "Código promocional creado",
-  codigo_eliminado: "Código promocional eliminado",
-  ajustes_actualizados: "Interruptor cambiado",
-  admin_creado: "Administrador añadido",
-  admin_revocado: "Administrador revocado",
-  referido_recompensado: "Referido premiado (+1 día)",
-};
-
 function formatAuditDetails(entry: AuditEntry): string {
   const d = entry.details || {};
   const by = d.by ? ` · por ${d.by}` : "";
@@ -111,6 +101,15 @@ function generateLicenseKey(): string {
 }
 
 function AdminPage() {
+  return (
+    <LanguageProvider>
+      <AdminPageInner />
+    </LanguageProvider>
+  );
+}
+
+function AdminPageInner() {
+  const { t } = useLanguage();
   const [adminKey, setAdminKey] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [keyInput, setKeyInput] = useState("");
@@ -124,8 +123,8 @@ function AdminPage() {
     sessionStorage.removeItem(STORAGE_KEY);
     setAdminKey(null);
     setKeyInput("");
-    setLoginError("Clave incorrecta.");
-  }, []);
+    setLoginError(t("invalidKeyError"));
+  }, [t]);
 
   const handleLogout = useCallback(() => {
     sessionStorage.removeItem(STORAGE_KEY);
@@ -149,13 +148,16 @@ function AdminPage() {
         <AdminPanel adminKey={adminKey} onUnauthorized={handleUnauthorized} onLogout={handleLogout} />
       ) : (
         <div className="w-full max-w-md">
+          <div className="mb-4 flex justify-end">
+            <LanguageSwitcher />
+          </div>
           <div className="surface-card p-6 md:p-8">
-            <span className="mono-label">Admin panel</span>
-            <h1 className="mt-2 font-display text-2xl font-semibold">Acceso restringido</h1>
+            <span className="mono-label">{t("adminPanelLabel")}</span>
+            <h1 className="mt-2 font-display text-2xl font-semibold">{t("restrictedAccessTitle")}</h1>
             <form onSubmit={onLogin} className="mt-6 space-y-4">
               <div>
                 <label htmlFor="admin-key" className="mono-label mb-2 block">
-                  Clave de administrador
+                  {t("adminKeyLabel")}
                 </label>
                 <input
                   id="admin-key"
@@ -172,7 +174,7 @@ function AdminPage() {
                 </p>
               )}
               <button type="submit" className="btn-primary w-full justify-center hover:[&]:btn-primary-hover">
-                Entrar →
+                {t("enterButton")}
               </button>
             </form>
           </div>
@@ -191,6 +193,7 @@ function AdminPanel({
   onUnauthorized: () => void;
   onLogout: () => void;
 }) {
+  const { t } = useLanguage();
   const [licencias, setLicencias] = useState<Licencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -266,7 +269,7 @@ function AdminPanel({
       if (!res.ok) setLoadError(`Error ${res.status}`);
       else setLicencias(Array.isArray(data) ? data : data?.licencias ?? []);
     } catch {
-      setLoadError("No se pudo cargar la lista.");
+      setLoadError(t("couldNotLoadList"));
     } finally {
       setLoading(false);
     }
@@ -299,7 +302,7 @@ function AdminPanel({
         setArchimonstruos(sorted);
       }
     } catch {
-      setArchisError("No se pudo cargar la lista.");
+      setArchisError(t("couldNotLoadList"));
     } finally {
       setLoadingArchis(false);
     }
@@ -354,7 +357,7 @@ function AdminPanel({
       if (!res.ok) setPromosError(`Error ${res.status}`);
       else setPromoCodes(Array.isArray(data) ? data : []);
     } catch {
-      setPromosError("No se pudo cargar la lista.");
+      setPromosError(t("couldNotLoadList"));
     } finally {
       setLoadingPromos(false);
     }
@@ -379,7 +382,7 @@ function AdminPanel({
       if (!res.ok) setAuditError(`Error ${res.status}`);
       else setAuditLog(Array.isArray(data) ? data : []);
     } catch {
-      setAuditError("No se pudo cargar el registro.");
+      setAuditError(t("couldNotLoadAuditLog"));
     } finally {
       setLoadingAudit(false);
     }
@@ -458,7 +461,7 @@ function AdminPanel({
       if (!res.ok) setAdminKeysError(`Error ${res.status}`);
       else setAdminKeys(Array.isArray(data) ? data : []);
     } catch {
-      setAdminKeysError("No se pudo cargar la lista.");
+      setAdminKeysError(t("couldNotLoadList"));
     } finally {
       setLoadingAdminKeys(false);
     }
@@ -498,7 +501,7 @@ function AdminPanel({
   }
 
   async function revokeAdminKey(id: string) {
-    const confirmed = window.confirm("¿Revocar el acceso de este administrador?");
+    const confirmed = window.confirm(t("confirmRevokeAdmin"));
     if (!confirmed) return;
 
     setRevokingAdminKey(id);
@@ -549,7 +552,7 @@ function AdminPanel({
       if (!res.ok) {
         setPromoFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
       } else {
-        setPromoFeedback({ type: "ok", text: data?.message || "Código creado." });
+        setPromoFeedback({ type: "ok", text: data?.message || t("codeCreatedOk") });
         setNewCode("");
         setPromoDurationValue("");
         setMaxUses("1");
@@ -557,14 +560,14 @@ function AdminPanel({
         loadAuditLog();
       }
     } catch {
-      setPromoFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+      setPromoFeedback({ type: "err", text: t("couldNotContactServer") });
     } finally {
       setPromoSubmitting(false);
     }
   }
 
   async function handleDeletePromo(code: string) {
-    const confirmed = window.confirm(`¿Eliminar el código "${code}"?`);
+    const confirmed = window.confirm(t("confirmDeleteCode", { code }));
     if (!confirmed) return;
 
     setDeletingCode(code);
@@ -582,11 +585,11 @@ function AdminPanel({
         setPromoFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
       } else {
         setPromoCodes((prev) => prev.filter((p) => p.code !== code));
-        setPromoFeedback({ type: "ok", text: data?.message || "Código eliminado." });
+        setPromoFeedback({ type: "ok", text: data?.message || t("codeDeletedOk") });
         loadAuditLog();
       }
     } catch {
-      setPromoFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+      setPromoFeedback({ type: "err", text: t("couldNotContactServer") });
     } finally {
       setDeletingCode(null);
     }
@@ -619,7 +622,7 @@ function AdminPanel({
       if (!res.ok) {
         setFeedback({ type: "err", text: data?.message || data?.error || `Error ${res.status}` });
       } else {
-        setFeedback({ type: "ok", text: data?.message || "Licencia registrada correctamente." });
+        setFeedback({ type: "ok", text: data?.message || t("licenseRegisteredOk") });
         setPcId("");
         setNewLic("");
         setDurationValue("");
@@ -628,16 +631,14 @@ function AdminPanel({
         loadAuditLog();
       }
     } catch {
-      setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+      setFeedback({ type: "err", text: t("couldNotContactServer") });
     } finally {
       setSubmitting(false);
     }
   }
 
   async function handleDelete(licencia: string) {
-    const confirmed = window.confirm(
-      `¿Eliminar la licencia "${licencia}"? Esta acción no se puede deshacer.`,
-    );
+    const confirmed = window.confirm(t("confirmDeleteLicense", { license: licencia }));
     if (!confirmed) return;
 
     setDeletingKey(licencia);
@@ -655,11 +656,11 @@ function AdminPanel({
         setFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
       } else {
         setLicencias((prev) => prev.filter((l) => l.licencia !== licencia));
-        setFeedback({ type: "ok", text: data?.message || "Licencia eliminada." });
+        setFeedback({ type: "ok", text: data?.message || t("licenseDeletedOk") });
         loadAuditLog();
       }
     } catch {
-      setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+      setFeedback({ type: "err", text: t("couldNotContactServer") });
     } finally {
       setDeletingKey(null);
     }
@@ -687,14 +688,14 @@ function AdminPanel({
       if (!res.ok) {
         setFeedback({ type: "err", text: data?.message || `Error ${res.status}` });
       } else {
-        setFeedback({ type: "ok", text: data?.message || "Licencia extendida." });
+        setFeedback({ type: "ok", text: data?.message || t("licenseExtendedOk") });
         setExtendingLicencia(null);
         setExtendValue("");
         loadLicencias();
         loadAuditLog();
       }
     } catch {
-      setFeedback({ type: "err", text: "No se pudo contactar con el servidor." });
+      setFeedback({ type: "err", text: t("couldNotContactServer") });
     } finally {
       setSubmittingExtend(false);
     }
@@ -715,16 +716,17 @@ function AdminPanel({
     <div className="w-full max-w-6xl space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="mono-label">Admin panel</span>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight">Licencias</h1>
+          <span className="mono-label">{t("adminPanelLabel")}</span>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight">{t("licensesTitle")}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <LanguageSwitcher />
           <div className="surface-card px-4 py-3">
-            <div className="mono-label">Total</div>
+            <div className="mono-label">{t("totalLabel")}</div>
             <div className="mt-1 font-display text-2xl font-semibold">{licencias.length}</div>
           </div>
           <div className="surface-card px-4 py-3">
-            <div className="mono-label">Usos</div>
+            <div className="mono-label">{t("usesLabel")}</div>
             <div className="mt-1 font-display text-2xl font-semibold text-primary">{totalUses}</div>
           </div>
           <button
@@ -732,7 +734,7 @@ function AdminPanel({
             onClick={onLogout}
             className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
           >
-            Cerrar sesión
+            {t("logoutButton")}
           </button>
         </div>
       </div>
@@ -743,15 +745,15 @@ function AdminPanel({
           className="surface-card border-destructive/30 p-5"
         >
           <h2 id="killswitch-heading" className="mono-label text-destructive">
-            ⚠ Interruptor de emergencia
+            {t("killswitchTitle")}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Desactiva estas funciones al instante para todo el mundo, sin tocar código.
+            {t("killswitchDesc")}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface-2/40 px-4 py-3">
               <div>
-                <div className="font-mono text-sm">Canjear códigos</div>
+                <div className="font-mono text-sm">{t("redeemCodesLabel")}</div>
                 <div className="mono-label text-[0.65rem] text-muted-foreground">/redeem</div>
               </div>
               <button
@@ -765,12 +767,12 @@ function AdminPanel({
                     : "border border-destructive/50 text-destructive")
                 }
               >
-                {savingSettings === "redeemEnabled" ? "…" : settings.redeemEnabled ? "Activo" : "Desactivado"}
+                {savingSettings === "redeemEnabled" ? "…" : settings.redeemEnabled ? t("activeLabel") : t("disabledLabel")}
               </button>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface-2/40 px-4 py-3">
               <div>
-                <div className="font-mono text-sm">Revelar posiciones</div>
+                <div className="font-mono text-sm">{t("revealPositionsLabel")}</div>
                 <div className="mono-label text-[0.65rem] text-muted-foreground">/position/:id</div>
               </div>
               <button
@@ -784,7 +786,7 @@ function AdminPanel({
                     : "border border-destructive/50 text-destructive")
                 }
               >
-                {savingSettings === "validateEnabled" ? "…" : settings.validateEnabled ? "Activo" : "Desactivado"}
+                {savingSettings === "validateEnabled" ? "…" : settings.validateEnabled ? t("activeLabel") : t("disabledLabel")}
               </button>
             </div>
           </div>
@@ -794,46 +796,46 @@ function AdminPanel({
       <section aria-labelledby="licenses-heading" className="surface-card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
           <h2 id="licenses-heading" className="font-display text-lg font-semibold">
-            Registered licenses
+            {t("registeredLicensesTitle")}
           </h2>
           <div className="flex items-center gap-3">
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por PC ID o licencia…"
-              aria-label="Buscar licencias"
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchAriaLabel")}
               className="field focus:[&]:field-focus h-8 w-48 text-sm"
             />
             <button
               onClick={loadLicencias}
               className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
             >
-              ↻ Recargar
+              {t("reloadButton")}
             </button>
           </div>
         </div>
         {loading ? (
-          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+          <p className="py-10 text-center text-muted-foreground">{t("loadingLabel")}</p>
         ) : loadError ? (
           <p className="py-10 text-center text-destructive">{loadError}</p>
         ) : licencias.length === 0 ? (
-          <p className="py-10 text-center text-muted-foreground">Sin licencias.</p>
+          <p className="py-10 text-center text-muted-foreground">{t("noLicensesLabel")}</p>
         ) : filteredLicencias.length === 0 ? (
           <p className="py-10 text-center text-muted-foreground">
-            Ninguna licencia coincide con "{searchQuery}".
+            {t("noMatchLabel", { query: searchQuery })}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Lista de licencias registradas</caption>
+              <caption className="sr-only">{t("licensesListCaption")}</caption>
               <thead>
                 <tr className="border-b border-border">
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">PC ID</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Licencia</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Usos</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Creación</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Caduca</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colPcId")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colLicense")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colUses")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colCreated")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colExpires")}</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
                 </tr>
               </thead>
@@ -867,7 +869,7 @@ function AdminPanel({
                             : "text-muted-foreground")
                         }
                       >
-                        {expiresDate ? expiresDate.toLocaleString() : "Permanente"}
+                        {expiresDate ? expiresDate.toLocaleString() : t("permanentLabel")}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <div className="flex items-center justify-end gap-3">
@@ -882,7 +884,7 @@ function AdminPanel({
                               }}
                               className="mono-label rounded text-primary transition-colors hover:text-primary/70"
                             >
-                              Extender
+                              {t("extendButton")}
                             </button>
                           )}
                           <button
@@ -891,7 +893,7 @@ function AdminPanel({
                             disabled={deletingKey === l.licencia}
                             className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
                           >
-                            {deletingKey === l.licencia ? "…" : "Eliminar"}
+                            {deletingKey === l.licencia ? "…" : t("deleteButton")}
                           </button>
                         </div>
                       </td>
@@ -901,29 +903,29 @@ function AdminPanel({
                         <td colSpan={6} className="px-5 py-4">
                           <div className="flex flex-wrap items-end gap-3">
                             <div>
-                              <label className="mono-label mb-2 block">Añadir</label>
+                              <label className="mono-label mb-2 block">{t("addLabel")}</label>
                               <input
                                 type="number"
                                 min="1"
                                 autoFocus
                                 value={extendValue}
                                 onChange={(e) => setExtendValue(e.target.value)}
-                                placeholder="Ej. 7"
+                                placeholder={t("egSeven")}
                                 className="field focus:[&]:field-focus w-28"
                               />
                             </div>
                             <div>
-                              <label className="mono-label mb-2 block">Unidad</label>
+                              <label className="mono-label mb-2 block">{t("unitLabel")}</label>
                               <select
                                 value={extendUnit}
                                 onChange={(e) => setExtendUnit(e.target.value as DurationUnit)}
                                 className="field focus:[&]:field-focus"
                               >
-                                <option value="minutes">Minutos</option>
-                                <option value="hours">Horas</option>
-                                <option value="days">Días</option>
-                                <option value="weeks">Semanas</option>
-                                <option value="months">Meses</option>
+                                <option value="minutes">{t("unitMinutes")}</option>
+                                <option value="hours">{t("unitHours")}</option>
+                                <option value="days">{t("unitDays")}</option>
+                                <option value="weeks">{t("unitWeeks")}</option>
+                                <option value="months">{t("unitMonths")}</option>
                               </select>
                             </div>
                             <button
@@ -932,14 +934,14 @@ function AdminPanel({
                               disabled={submittingExtend || !extendValue.trim()}
                               className="btn-primary hover:[&]:btn-primary-hover disabled:opacity-50"
                             >
-                              {submittingExtend ? "…" : "Confirmar →"}
+                              {submittingExtend ? "…" : t("confirmButton")}
                             </button>
                             <button
                               type="button"
                               onClick={() => setExtendingLicencia(null)}
                               className="mono-label rounded text-muted-foreground transition-colors hover:text-primary"
                             >
-                              Cancelar
+                              {t("cancelButton")}
                             </button>
                           </div>
                         </td>
@@ -956,7 +958,7 @@ function AdminPanel({
 
       <section aria-labelledby="register-heading" className="surface-card p-6 md:p-8">
         <h2 id="register-heading" className="font-display text-lg font-semibold">
-          Registrar nueva licencia
+          {t("registerLicenseTitle")}
         </h2>
         {feedback && (
           <div
@@ -992,7 +994,7 @@ function AdminPanel({
           </div>
           <div>
             <label htmlFor="newlic" className="mono-label mb-2 block">
-              Nueva licencia
+              {t("newLicenseLabel")}
             </label>
             <div className="flex gap-2">
               <input
@@ -1007,44 +1009,44 @@ function AdminPanel({
                 onClick={() => setNewLic(generateLicenseKey())}
                 className="mono-label rounded border border-border px-3 text-[0.7rem] transition-colors hover:border-primary/60 hover:text-primary"
               >
-                Generar
+                {t("generateButton")}
               </button>
             </div>
           </div>
           <div>
             <label htmlFor="duration" className="mono-label mb-2 block">
-              Duración (opcional)
+              {t("durationOptionalLabel")}
             </label>
             <div className="flex gap-2">
               <input
                 id="duration"
                 type="number"
                 min="1"
-                placeholder="Ej. 24"
+                placeholder={t("egHours")}
                 value={durationValue}
                 onChange={(e) => setDurationValue(e.target.value)}
                 className="field focus:[&]:field-focus flex-1"
               />
               <select
-                aria-label="Unidad de duración"
+                aria-label={t("durationUnitAria")}
                 value={durationUnit}
                 onChange={(e) => setDurationUnit(e.target.value as DurationUnit)}
                 className="field focus:[&]:field-focus"
               >
-                <option value="minutes">Minutos</option>
-                <option value="hours">Horas</option>
-                <option value="days">Días</option>
-                <option value="weeks">Semanas</option>
-                <option value="months">Meses</option>
+                <option value="minutes">{t("unitMinutes")}</option>
+                <option value="hours">{t("unitHours")}</option>
+                <option value="days">{t("unitDays")}</option>
+                <option value="weeks">{t("unitWeeks")}</option>
+                <option value="months">{t("unitMonths")}</option>
               </select>
             </div>
             <p className="mono-label mt-2 text-muted-foreground">
-              Vacío = licencia permanente
+              {t("emptyMeansPermanent")}
             </p>
           </div>
           <div>
             <label htmlFor="referral-input" className="mono-label mb-2 block">
-              Código de referido (opcional)
+              {t("referralCodeLabel")}
             </label>
             <input
               id="referral-input"
@@ -1054,7 +1056,7 @@ function AdminPanel({
               className="field focus:[&]:field-focus"
             />
             <p className="mono-label mt-2 text-muted-foreground">
-             Si te dijo quién lo invitó, ponlo aquí — le suma +1 día a esa licencia.
+             {t("referralHelp")}
             </p>
           </div>
           <div className="flex items-end md:justify-end">
@@ -1063,7 +1065,7 @@ function AdminPanel({
               disabled={submitting}
               className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:opacity-50 md:w-auto"
             >
-              {submitting ? "…" : "Registrar →"}
+              {submitting ? "…" : t("registerButton")}
             </button>
           </div>
         </form>
@@ -1072,27 +1074,27 @@ function AdminPanel({
       <section aria-labelledby="archis-heading" className="surface-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 id="archis-heading" className="font-display text-lg font-semibold flex items-center gap-2">
-            Archimonstruos activos
+            {t("activeArchisTitle")}
             <span
               className={archisLive ? "live-dot" : "live-dot opacity-30"}
               aria-hidden="true"
-              title={archisLive ? "En vivo" : "Conectando…"}
+              title={archisLive ? t("liveLabel") : t("connectingLabel")}
             />
           </h2>
           <button
             onClick={loadArchimonstruos}
             className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
           >
-            ↻ Recargar
+            {t("reloadButton")}
           </button>
         </div>
         {loadingArchis ? (
-          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+          <p className="py-10 text-center text-muted-foreground">{t("loadingLabel")}</p>
         ) : archisError ? (
           <p className="py-10 text-center text-destructive">{archisError}</p>
         ) : archimonstruos.length === 0 ? (
           <p className="py-10 text-center text-muted-foreground">
-            No hay archimonstruos activos ahora mismo.
+            {t("noActiveArchis")}
           </p>
         ) : (
           <ul role="list" className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-3 md:grid-cols-4">
@@ -1122,31 +1124,31 @@ function AdminPanel({
       <section aria-labelledby="promo-heading" className="surface-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 id="promo-heading" className="font-display text-lg font-semibold">
-            Códigos promocionales
+            {t("promoCodesTitle")}
           </h2>
           <button
             onClick={loadPromoCodes}
             className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
           >
-            ↻ Recargar
+            {t("reloadButton")}
           </button>
         </div>
         {loadingPromos ? (
-          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+          <p className="py-10 text-center text-muted-foreground">{t("loadingLabel")}</p>
         ) : promosError ? (
           <p className="py-10 text-center text-destructive">{promosError}</p>
         ) : promoCodes.length === 0 ? (
-          <p className="py-10 text-center text-muted-foreground">Sin códigos todavía.</p>
+          <p className="py-10 text-center text-muted-foreground">{t("noCodesYet")}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Lista de códigos promocionales</caption>
+              <caption className="sr-only">{t("promoListCaption")}</caption>
               <thead>
                 <tr className="border-b border-border">
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Código</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Duración</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Usos</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Estado</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colCode")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colDuration")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colUses")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colStatus")}</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
                 </tr>
               </thead>
@@ -1160,14 +1162,14 @@ function AdminPanel({
                     <td className="px-5 py-3.5 text-muted-foreground">
                       {p.durationValue && p.durationUnit
                         ? `${p.durationValue} ${p.durationUnit}`
-                        : "Permanente"}
+                        : t("permanentLabel")}
                     </td>
                     <td className="px-5 py-3.5">
                       <span className="badge-dot">{p.uses}/{p.maxUses}</span>
                     </td>
                     <td className="px-5 py-3.5">
                       <span className={p.active ? "text-primary" : "text-muted-foreground"}>
-                        {p.active ? "Activo" : "Agotado"}
+                        {p.active ? t("activeLabel") : t("exhaustedLabel")}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -1177,7 +1179,7 @@ function AdminPanel({
                         disabled={deletingCode === p.code}
                         className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
                       >
-                        {deletingCode === p.code ? "…" : "Eliminar"}
+                        {deletingCode === p.code ? "…" : t("deleteButton")}
                       </button>
                     </td>
                   </tr>
@@ -1188,7 +1190,7 @@ function AdminPanel({
         )}
 
         <div className="border-t border-border p-6 md:p-8">
-          <h3 className="font-display text-base font-semibold">Crear código nuevo</h3>
+          <h3 className="font-display text-base font-semibold">{t("createNewCodeTitle")}</h3>
           {promoFeedback && (
             <div
               role="alert"
@@ -1213,7 +1215,7 @@ function AdminPanel({
           <form onSubmit={onCreatePromo} className="mt-5 grid gap-4 md:grid-cols-2">
             <div>
               <label htmlFor="promocode" className="mono-label mb-2 block">
-                Código
+                {t("codeLabel")}
               </label>
               <input
                 id="promocode"
@@ -1226,7 +1228,7 @@ function AdminPanel({
             </div>
             <div>
               <label htmlFor="maxuses" className="mono-label mb-2 block">
-                Usos máximos
+                {t("maxUsesLabel")}
               </label>
               <input
                 id="maxuses"
@@ -1239,29 +1241,29 @@ function AdminPanel({
             </div>
             <div className="md:col-span-2">
               <label htmlFor="promoduration" className="mono-label mb-2 block">
-                Duración de la licencia (opcional — vacío = permanente)
+                {t("promoDurationLabel")}
               </label>
               <div className="flex gap-2">
                 <input
                   id="promoduration"
                   type="number"
                   min="1"
-                  placeholder="Ej. 7"
+                  placeholder={t("egSeven")}
                   value={promoDurationValue}
                   onChange={(e) => setPromoDurationValue(e.target.value)}
                   className="field focus:[&]:field-focus flex-1"
                 />
                 <select
-                  aria-label="Unidad de duración del código"
+                  aria-label={t("promoDurationUnitAria")}
                   value={promoDurationUnit}
                   onChange={(e) => setPromoDurationUnit(e.target.value as DurationUnit)}
                   className="field focus:[&]:field-focus"
                 >
-                  <option value="minutes">Minutos</option>
-                  <option value="hours">Horas</option>
-                  <option value="days">Días</option>
-                  <option value="weeks">Semanas</option>
-                  <option value="months">Meses</option>
+                  <option value="minutes">{t("unitMinutes")}</option>
+                  <option value="hours">{t("unitHours")}</option>
+                  <option value="days">{t("unitDays")}</option>
+                  <option value="weeks">{t("unitWeeks")}</option>
+                  <option value="months">{t("unitMonths")}</option>
                 </select>
               </div>
             </div>
@@ -1271,7 +1273,7 @@ function AdminPanel({
                 disabled={promoSubmitting}
                 className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:opacity-50 md:w-auto"
               >
-                {promoSubmitting ? "…" : "Crear código →"}
+                {promoSubmitting ? "…" : t("createCodeButton")}
               </button>
             </div>
           </form>
@@ -1281,28 +1283,28 @@ function AdminPanel({
       <section aria-labelledby="audit-heading" className="surface-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 id="audit-heading" className="font-display text-lg font-semibold">
-            Registro de actividad
+            {t("auditLogTitle")}
           </h2>
           <button
             onClick={loadAuditLog}
             className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
           >
-            ↻ Recargar
+            {t("reloadButton")}
           </button>
         </div>
         {loadingAudit ? (
-          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+          <p className="py-10 text-center text-muted-foreground">{t("loadingLabel")}</p>
         ) : auditError ? (
           <p className="py-10 text-center text-destructive">{auditError}</p>
         ) : auditLog.length === 0 ? (
-          <p className="py-10 text-center text-muted-foreground">Sin actividad todavía.</p>
+          <p className="py-10 text-center text-muted-foreground">{t("noActivityYet")}</p>
         ) : (
           <ul role="list" className="max-h-96 divide-y divide-border/60 overflow-y-auto">
             {auditLog.map((entry, i) => (
               <li key={i} className="flex items-center justify-between gap-3 px-5 py-3">
                 <div>
                   <span className="font-mono text-sm">
-                    {ACTION_LABELS[entry.action] || entry.action}
+                    {t(`action_${entry.action}`) !== `action_${entry.action}` ? t(`action_${entry.action}`) : entry.action}
                   </span>
                   <div className="mono-label mt-0.5 text-[0.65rem] text-muted-foreground">
                     {formatAuditDetails(entry)}
@@ -1322,31 +1324,31 @@ function AdminPanel({
           <>
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 id="admins-heading" className="font-display text-lg font-semibold">
-            Administradores
+            {t("administratorsTitle")}
           </h2>
           <button
             onClick={loadAdminKeys}
             className="mono-label rounded transition-colors hover:text-primary focus-visible:text-primary"
           >
-            ↻ Recargar
+            {t("reloadButton")}
           </button>
         </div>
         {loadingAdminKeys ? (
-          <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+          <p className="py-10 text-center text-muted-foreground">{t("loadingLabel")}</p>
         ) : adminKeysError ? (
           <p className="py-10 text-center text-destructive">{adminKeysError}</p>
         ) : adminKeys.length === 0 ? (
           <p className="py-10 text-center text-muted-foreground">
-            Solo tú (con la clave maestra) tienes acceso por ahora.
+            {t("onlyYouHaveAccess")}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <caption className="sr-only">Lista de administradores adicionales</caption>
+              <caption className="sr-only">{t("adminsListCaption")}</caption>
               <thead>
                 <tr className="border-b border-border">
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Nombre</th>
-                  <th scope="col" className="mono-label px-5 py-3 font-normal">Creado</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colName")}</th>
+                  <th scope="col" className="mono-label px-5 py-3 font-normal">{t("colCreated")}</th>
                   <th scope="col" className="mono-label px-5 py-3 font-normal"></th>
                 </tr>
               </thead>
@@ -1364,7 +1366,7 @@ function AdminPanel({
                         disabled={revokingAdminKey === k._id}
                         className="mono-label rounded text-destructive transition-colors hover:text-destructive/70 disabled:opacity-50"
                       >
-                        {revokingAdminKey === k._id ? "…" : "Revocar"}
+                        {revokingAdminKey === k._id ? "…" : t("revokeButton")}
                       </button>
                     </td>
                   </tr>
@@ -1375,11 +1377,11 @@ function AdminPanel({
         )}
 
         <div className="border-t border-border p-6 md:p-8">
-          <h3 className="font-display text-base font-semibold">Añadir administrador</h3>
+          <h3 className="font-display text-base font-semibold">{t("addAdminTitle")}</h3>
           {lastCreatedKey && (
             <div className="mt-4 rounded-lg border border-[color:var(--success)]/40 bg-[color:var(--success)]/10 p-4">
               <div className="mono-label" style={{ color: "var(--success)" }}>
-                Clave generada — cópiala ahora, no se volverá a mostrar
+                {t("keyGeneratedWarning")}
               </div>
               <div className="mt-2 break-all rounded border border-border bg-surface-2/50 p-3 font-mono text-sm">
                 {lastCreatedKey}
@@ -1389,14 +1391,14 @@ function AdminPanel({
           <form onSubmit={onCreateAdminKey} className="mt-5 flex flex-wrap items-end gap-3">
             <div className="flex-1">
               <label htmlFor="adminname" className="mono-label mb-2 block">
-                Nombre
+                {t("colName")}
               </label>
               <input
                 id="adminname"
                 required
                 value={newAdminName}
                 onChange={(e) => setNewAdminName(e.target.value)}
-                placeholder="Ej. Alex"
+                placeholder={t("egAlex")}
                 className="field focus:[&]:field-focus"
               />
             </div>
@@ -1405,7 +1407,7 @@ function AdminPanel({
               disabled={creatingAdminKey}
               className="btn-primary hover:[&]:btn-primary-hover disabled:opacity-50"
             >
-              {creatingAdminKey ? "…" : "Crear →"}
+              {creatingAdminKey ? "…" : t("createButton")}
             </button>
           </form>
         </div>
