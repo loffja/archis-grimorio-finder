@@ -906,7 +906,7 @@ function AdminPanel({
                               <select
                                 value={extendUnit}
                                 onChange={(e) => setExtendUnit(e.target.value as DurationUnit)}
-                                className="field focus:[&]:field-focus"
+                                className="field focus:[&]:field-focus w-auto shrink-0"
                               >
                                 <option value="minutes">{t("unitMinutes")}</option>
                                 <option value="hours">{t("unitHours")}</option>
@@ -1018,7 +1018,7 @@ function AdminPanel({
                 aria-label={t("durationUnitAria")}
                 value={durationUnit}
                 onChange={(e) => setDurationUnit(e.target.value as DurationUnit)}
-                className="field focus:[&]:field-focus"
+                className="field focus:[&]:field-focus w-auto shrink-0"
               >
                 <option value="minutes">{t("unitMinutes")}</option>
                 <option value="hours">{t("unitHours")}</option>
@@ -1244,7 +1244,7 @@ function AdminPanel({
                   aria-label={t("promoDurationUnitAria")}
                   value={promoDurationUnit}
                   onChange={(e) => setPromoDurationUnit(e.target.value as DurationUnit)}
-                  className="field focus:[&]:field-focus"
+                  className="field focus:[&]:field-focus w-auto shrink-0"
                 >
                   <option value="minutes">{t("unitMinutes")}</option>
                   <option value="hours">{t("unitHours")}</option>
