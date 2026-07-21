@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
  */
 function DofusRadar() {
   return (
-    <div className="relative mx-auto mt-6 h-[220px] w-full max-w-2xl md:h-[280px]">
+    <div className="relative mx-auto mt-4 h-[190px] w-full max-w-2xl md:h-[240px]">
       <div className="absolute right-0 top-2 z-10 hidden md:block">
         <div className="surface-card px-3 py-2 font-mono text-[0.7rem]">
           <div className="text-muted-foreground">Jalatintanic, el Hundido</div>
@@ -26,7 +26,7 @@ function DofusRadar() {
       </div>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="animate-float">
-          <svg viewBox="0 0 400 400" className="h-[220px] w-[220px] md:h-[280px] md:w-[280px]" role="img" aria-label="Radar de archimonstruos">
+          <svg viewBox="0 0 400 400" className="h-[190px] w-[190px] md:h-[240px] md:w-[240px]" role="img" aria-label="Radar de archimonstruos">
             <defs>
               <radialGradient id="ring-glow" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#ff2d87" stopOpacity="0.35" />
@@ -90,19 +90,22 @@ function Index() {
     <Layout>
       <div className="w-full max-w-3xl">
         <div className="text-center">
-          <span className="badge-dot">
-            <span className="live-dot" aria-hidden="true" /> {t("home_liveBadge")}
-          </span>
-          <div className="mt-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="badge-dot">
+              <span className="live-dot" aria-hidden="true" /> {t("home_liveBadge")}
+            </span>
             <span className="mono-label rounded-full border border-primary/40 px-3 py-1 text-primary">
               {t("home_coverageBadge")}
             </span>
           </div>
-          <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-            {t("home_titlePart1")} <span className="text-gradient">{t("home_titleHighlight")}</span>
-            <br className="hidden sm:block" /> {t("home_titlePart2")}
+          <h1
+            className="mx-auto mt-4 max-w-2xl text-4xl font-semibold leading-[1.1] tracking-tight md:text-6xl"
+            style={{ textWrap: "balance" }}
+          >
+            {t("home_titlePart1")} <span className="text-gradient">{t("home_titleHighlight")}</span>{" "}
+            {t("home_titlePart2")}
           </h1>
-          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
             <strong className="text-foreground">DakuBot</strong> {t("home_desc")}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
@@ -124,7 +127,7 @@ function Index() {
 
         <DofusRadar />
 
-        <div className="surface-card mt-6 p-5 text-center">
+        <div className="surface-card mt-5 p-5 text-center">
           <div className="mono-label">{t("home_fromLabel")}</div>
           <div className="font-display text-2xl font-semibold text-primary">
             $6 USD<span className="text-sm font-normal text-muted-foreground">{t("home_perDay")}</span>
@@ -132,20 +135,20 @@ function Index() {
           <p className="mt-1 text-sm text-muted-foreground">
             {t("home_monthlyBestPrice")}
           </p>
-          <Link
-            to="/price"
-            className="mono-label mt-3 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/70"
-          >
-            {t("home_seeAllPlans")}
-          </Link>
-        </div>
-        <div className="mt-3 text-center">
-          <Link
-            to="/how-it-works"
-            className="mono-label text-muted-foreground transition-colors hover:text-primary"
-          >
-            {t("home_seeFullGuide")}
-          </Link>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link
+              to="/price"
+              className="mono-label inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/70"
+            >
+              {t("home_seeAllPlans")}
+            </Link>
+            <Link
+              to="/how-it-works"
+              className="mono-label inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary"
+            >
+              {t("home_seeFullGuide")}
+            </Link>
+          </div>
         </div>
       </div>
     </Layout>
