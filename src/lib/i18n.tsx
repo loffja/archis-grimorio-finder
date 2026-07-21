@@ -589,10 +589,10 @@ const en: Dict = {
   referralHelp: "If they told you who invited them, put it here — it adds +1 day to that license.",
   registerButton: "Register →",
 
-  activeArchisTitle: "Active archmonsters",
+  activeArchisTitle: "Active archimonsters",
   liveLabel: "Live",
   connectingLabel: "Connecting…",
-  noActiveArchis: "No active archmonsters right now.",
+  noActiveArchis: "No active archimonsters right now.",
 
   promoCodesTitle: "Promo codes",
   noCodesYet: "No codes yet.",
@@ -667,9 +667,9 @@ const en: Dict = {
   home_liveBadge: "Dofus Touch · Live positions",
   home_coverageBadge: "100% Ocre coverage",
   home_titlePart1: "Hunt every",
-  home_titleHighlight: "archmonster",
+  home_titleHighlight: "archimonster",
   home_titlePart2: "before it flees.",
-  home_desc: "gives you exact, real-time coordinates for Dofus Touch archmonsters, straight from our pathfinder.",
+  home_desc: "gives you exact, real-time coordinates for Dofus Touch archimonsters, straight from our pathfinder.",
   home_enterButton: "Enter",
   home_howItWorks: "How it works",
   home_fromLabel: "From",
@@ -779,7 +779,7 @@ const en: Dict = {
   live_activeLicensesLabel: "Active licenses",
   live_mostSearchedLabel: "Most searched",
   live_previewLabel: "🔧 Preview",
-  live_previewDesc: "This is what LIVE looks like when the bot is active. The archmonsters below are examples.",
+  live_previewDesc: "This is what LIVE looks like when the bot is active. The archimonsters below are examples.",
   live_viewPosition: "View position →",
 
   statusBadge_ariaLabel: "Server status: online, ping {ping} milliseconds, {players} players online",
