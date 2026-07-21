@@ -46,7 +46,15 @@ function NavMenu() {
   );
 }
 
-export function Layout({ children, noScroll = false }: { children: ReactNode; noScroll?: boolean }) {
+export function Layout({
+  children,
+  noScroll = false,
+  align = "center",
+}: {
+  children: ReactNode;
+  noScroll?: boolean;
+  align?: "center" | "start";
+}) {
   const { t } = useLanguage();
   return (
     <div
@@ -81,7 +89,13 @@ export function Layout({ children, noScroll = false }: { children: ReactNode; no
         </div>
         <LanguageSwitcher />
       </header>
-      <main id="main-content" className="relative z-10 flex flex-1 items-start justify-center px-4 py-4 md:items-center md:px-8 md:py-6">
+      <main
+        id="main-content"
+        className={
+          "relative z-10 flex flex-1 items-start justify-center px-4 py-4 md:px-8 md:py-6 " +
+          (align === "center" ? "md:items-center" : "md:items-start md:pt-16")
+        }
+      >
         {children}
       </main>
       <footer className="relative z-10 border-t border-border/60 py-6 text-center">

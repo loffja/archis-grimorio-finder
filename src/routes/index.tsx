@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useLanguage();
   return (
-    <Layout noScroll>
+    <Layout noScroll align="start">
       <div className="w-full max-w-2xl">
         <div className="text-center">
           <div className="flex flex-col items-center gap-2">
@@ -24,7 +24,7 @@ function Index() {
             {t("home_titlePart1")} <span className="text-gradient">{t("home_titleHighlight")}</span>{" "}
             {t("home_titlePart2")}
           </h1>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
+          <p className="mx-auto mt-3 min-h-[2.6rem] max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
             <strong className="text-foreground">DakuBot</strong> {t("home_desc")}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
