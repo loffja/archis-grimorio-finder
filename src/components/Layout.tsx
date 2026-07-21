@@ -46,10 +46,14 @@ function NavMenu() {
   );
 }
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({ children, noScroll = false }: { children: ReactNode; noScroll?: boolean }) {
   const { t } = useLanguage();
   return (
-    <div className="relative flex min-h-dvh flex-col">
+    <div
+      className={
+        "relative flex min-h-dvh flex-col" + (noScroll ? " md:h-dvh md:overflow-hidden" : "")
+      }
+    >
       {/* Skip link for keyboard users */}
       <a
         href="#main-content"
