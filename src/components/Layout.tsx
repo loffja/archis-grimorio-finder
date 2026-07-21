@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ServerStatusBadge } from "./ServerStatusBadge";
 import { SystemStatus } from "./SystemStatus";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/lib/i18n";
@@ -32,7 +31,7 @@ function useNavLinks() {
 function NavMenu() {
   const navLinks = useNavLinks();
   return (
-    <nav aria-label="Principal" className="flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
+    <nav aria-label="Principal" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
       {navLinks.map((link) => (
         <Link
           key={link.to}
@@ -59,7 +58,7 @@ export function Layout({ children }: { children: ReactNode }) {
         {t("skipToContent")}
       </a>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
-      <header className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-3 md:px-10">
+      <header className="relative z-10 flex flex-wrap items-center gap-4 px-6 py-3 md:px-10">
         <Link
           to="/"
           className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -73,11 +72,10 @@ export function Layout({ children }: { children: ReactNode }) {
             <div className="mono-label mt-0.5 text-[0.55rem]">{t("headerTagline")}</div>
           </div>
         </Link>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-1 justify-center">
           <NavMenu />
-          <LanguageSwitcher />
-          <ServerStatusBadge />
         </div>
+        <LanguageSwitcher />
       </header>
       <main id="main-content" className="relative z-10 flex flex-1 items-start justify-center px-4 py-4 md:items-center md:px-8 md:py-6">
         {children}
