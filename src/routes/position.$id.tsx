@@ -114,7 +114,7 @@ function PositionPage() {
     : null;
 
   return (
-    <Layout>
+    <Layout align="start">
       <div className="w-full max-w-md">
         <div className="text-center">
           <span className="badge-dot font-mono">

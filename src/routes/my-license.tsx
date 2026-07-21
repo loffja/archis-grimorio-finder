@@ -84,7 +84,7 @@ function MyLicensePage() {
   const expiresAtMs = info?.expiresAt ? new Date(info.expiresAt).getTime() : null;
 
   return (
-    <Layout>
+    <Layout align="start">
       <div className="w-full max-w-md">
         <div className="text-center">
           <span className="mono-label">{t("myLicense_label")}</span>

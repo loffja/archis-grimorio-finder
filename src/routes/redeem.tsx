@@ -24,7 +24,7 @@ type RedeemResult = {
 
 function RedeemPage() {
   return (
-    <Layout>
+    <Layout align="start">
       <RedeemForm />
     </Layout>
   );
