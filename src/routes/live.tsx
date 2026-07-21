@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
+import { useLanguage, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -311,18 +312,31 @@ function demoImageUrl(id: number) {
   return `https://raw.githubusercontent.com/Gianxaje/kkkal/main/imgBLUR/${id}.png`;
 }
 
-function formatElapsed(msSince: number): string {
+const APPEARED_PREFIX: Record<Lang, string> = { es: "Apareció hace", fr: "Apparu il y a", en: "Appeared" };
+const APPEARED_SUFFIX: Record<Lang, string> = { es: "", fr: "", en: "ago" };
+const LIVE_UNITS: Record<Lang, { h: string; min: string; s: string }> = {
+  es: { h: "h", min: "min", s: "s" },
+  fr: { h: "h", min: "min", s: "s" },
+  en: { h: "h", min: "min", s: "s" },
+};
+
+function formatElapsed(msSince: number, lang: Lang): string {
   const totalSeconds = Math.max(0, Math.floor(msSince / 1000));
+  const u = LIVE_UNITS[lang];
+  let core: string;
   if (totalSeconds < 60) {
-    return `Apareció hace ${totalSeconds}s`;
+    core = `${totalSeconds}${u.s}`;
+  } else {
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    if (totalMinutes < 60) {
+      core = `${totalMinutes} ${u.min}`;
+    } else {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      core = `${hours}${u.h} ${minutes}${u.min}`;
+    }
   }
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  if (totalMinutes < 60) {
-    return `Apareció hace ${totalMinutes} min`;
-  }
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `Apareció hace ${hours}h ${minutes}min`;
+  return [APPEARED_PREFIX[lang], core, APPEARED_SUFFIX[lang]].filter(Boolean).join(" ");
 }
 
 function LivePage() {
@@ -334,6 +348,7 @@ function LivePage() {
 }
 
 function LiveFeed() {
+  const { t, lang } = useLanguage();
   const [items, setItems] = useState<ArchimonstruoActivo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -363,7 +378,7 @@ function LiveFeed() {
         mergeSorted(Array.isArray(data) ? data : []);
       }
     } catch {
-      setError("No se pudo conectar con el servidor.");
+      setError(t("live_couldNotConnect"));
     } finally {
       setLoading(false);
     }
@@ -455,14 +470,13 @@ function LiveFeed() {
         <div>
           <span className="mono-label flex items-center gap-2">
             <span className={live ? "live-dot" : "live-dot opacity-30"} aria-hidden="true" />
-            {live ? "En vivo" : "Conectando…"}
+            {live ? t("liveLabel") : t("connectingLabel")}
           </span>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight">
-            Archimonstruos activos
+            {t("activeArchisTitle")}
           </h1>
           <p className="mt-2 max-w-prose text-sm text-muted-foreground">
-            Aparecen aquí al instante en cuanto se registran. Toca uno para
-            introducir tu licencia y revelar su posición exacta.
+            {t("live_pageDesc")}
           </p>
         </div>
       </div>
@@ -470,17 +484,17 @@ function LiveFeed() {
       {stats && (
         <div className="grid grid-cols-3 gap-3">
           <div className="surface-card px-4 py-3 text-center">
-            <div className="mono-label">Hoy</div>
+            <div className="mono-label">{t("live_todayLabel")}</div>
             <div className="mt-1 font-display text-2xl font-semibold">{stats.archimonstrosHoy}</div>
           </div>
           <div className="surface-card px-4 py-3 text-center">
-            <div className="mono-label">Licencias activas</div>
+            <div className="mono-label">{t("live_activeLicensesLabel")}</div>
             <div className="mt-1 font-display text-2xl font-semibold text-primary">
               {stats.licenciasActivas}
             </div>
           </div>
           <div className="surface-card px-4 py-3 text-center">
-            <div className="mono-label">Más buscado</div>
+            <div className="mono-label">{t("live_mostSearchedLabel")}</div>
             <div className="mt-1 truncate font-display text-lg font-semibold">
               {stats.masBuscado ? stats.masBuscado.name : "—"}
             </div>
@@ -489,7 +503,7 @@ function LiveFeed() {
       )}
 
       {loading && (
-        <p className="py-10 text-center text-muted-foreground">Cargando…</p>
+        <p className="py-10 text-center text-muted-foreground">{t("loadingLabel")}</p>
       )}
 
       {!loading && error && (
@@ -499,9 +513,9 @@ function LiveFeed() {
       {!loading && !error && items.length === 0 && (
         <div className="space-y-5">
           <div className="surface-card border-primary/30 px-5 py-4 text-center">
-            <span className="mono-label text-primary">🔧 Vista previa</span>
+            <span className="mono-label text-primary">{t("live_previewLabel")}</span>
             <p className="mt-1 text-sm text-muted-foreground">
-              Así se ve LIVE cuando el bot está activo. Los archimonstruos de abajo son de ejemplo.
+              {t("live_previewDesc")}
             </p>
           </div>
           <ul
@@ -530,7 +544,7 @@ function LiveFeed() {
                     Blair
                   </span>
                   <span className="mono-label rounded-full border border-primary/30 px-2.5 py-0.5 text-[0.65rem] text-primary">
-                    Ver posición →
+                    {t("live_viewPosition")}
                   </span>
                 </Link>
               </li>
@@ -568,7 +582,7 @@ function LiveFeed() {
                     {a.server}
                   </span>
                   <span className="mono-label rounded-full border border-primary/30 px-2.5 py-0.5 text-[0.65rem] text-primary">
-                    {formatElapsed(elapsedMs)}
+                    {formatElapsed(elapsedMs, lang)}
                   </span>
                 </Link>
               </li>

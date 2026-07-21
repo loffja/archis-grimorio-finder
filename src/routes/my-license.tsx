@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
+import { useLanguage, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/my-license")({
   head: () => ({
@@ -18,19 +19,27 @@ type LicenseInfo = {
   referralCode?: string;
 };
 
-function formatRemaining(msRemaining: number): string {
-  if (msRemaining <= 0) return "caducada";
+const REMAINING_UNITS: Record<Lang, { d: string; h: string; min: string }> = {
+  es: { d: "d", h: "h", min: "min" },
+  fr: { d: "j", h: "h", min: "min" },
+  en: { d: "d", h: "h", min: "min" },
+};
+
+function formatRemaining(msRemaining: number, lang: Lang): string {
+  const u = REMAINING_UNITS[lang];
+  if (msRemaining <= 0) return "0" + u.min;
   const totalSeconds = Math.floor(msRemaining / 1000);
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}min`;
-  return `${minutes}min`;
+  if (days > 0) return `${days}${u.d} ${hours}${u.h}`;
+  if (hours > 0) return `${hours}${u.h} ${minutes}${u.min}`;
+  return `${minutes}${u.min}`;
 }
 
 function MyLicensePage() {
+  const { t, lang } = useLanguage();
   const [licencia, setLicencia] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +64,7 @@ function MyLicensePage() {
         setInfo(data);
       }
     } catch {
-      setError("No se pudo contactar con el servidor.");
+      setError(t("couldNotContactServer"));
     } finally {
       setLoading(false);
     }
@@ -78,12 +87,12 @@ function MyLicensePage() {
     <Layout>
       <div className="w-full max-w-md">
         <div className="text-center">
-          <span className="mono-label">Consulta</span>
+          <span className="mono-label">{t("myLicense_label")}</span>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
-            Mi <span className="text-primary">licencia</span>
+            {t("myLicense_titlePart1")} <span className="text-primary">{t("myLicense_titleHighlight")}</span>
           </h1>
           <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
-            Consulta cuándo caduca tu licencia y recupera tu código de referido, cuando quieras.
+            {t("myLicense_desc")}
           </p>
         </div>
 
@@ -100,7 +109,7 @@ function MyLicensePage() {
           <form onSubmit={onSubmit} className="space-y-5">
             <div>
               <label htmlFor="licencia" className="mono-label mb-2 block">
-                Clave de licencia
+                {t("myLicense_keyLabel")}
               </label>
               <input
                 id="licencia"
@@ -118,7 +127,7 @@ function MyLicensePage() {
               disabled={loading || !licencia.trim()}
               className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Consultando…" : "Consultar"}
+              {loading ? t("myLicense_checking") : t("myLicense_checkButton")}
               {!loading && <span aria-hidden>→</span>}
             </button>
           </form>
@@ -126,15 +135,15 @@ function MyLicensePage() {
           {info && (
             <div className="mt-6 space-y-4 border-t border-border pt-6">
               <div className="text-center">
-                <div className="mono-label">Estado</div>
+                <div className="mono-label">{t("myLicense_statusLabel")}</div>
                 <div className="mt-1.5 font-mono text-sm">
                   {!info.expiresAt ? (
-                    <span className="text-muted-foreground">Permanente</span>
+                    <span className="text-muted-foreground">{t("permanentLabel")}</span>
                   ) : info.expired ? (
-                    <span className="text-destructive">Ha caducado</span>
+                    <span className="text-destructive">{t("myLicense_expired")}</span>
                   ) : (
                     <span className="text-primary">
-                      Vence en {formatRemaining(expiresAtMs! - Date.now())}
+                      {t("myLicense_expiresIn")} {formatRemaining(expiresAtMs! - Date.now(), lang)}
                     </span>
                   )}
                 </div>
@@ -142,9 +151,9 @@ function MyLicensePage() {
 
               {info.referralCode && (
                 <div className="text-center">
-                  <div className="mono-label text-primary">Tu código de referido</div>
+                  <div className="mono-label text-primary">{t("myLicense_yourReferralCode")}</div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Compártelo — ganas +1 día por cada amigo que lo use al registrarse.
+                    {t("myLicense_shareIt")}
                   </p>
                   <div className="mt-3 flex items-center justify-center gap-2">
                     <span className="rounded-lg border border-border bg-surface-2/50 px-3 py-1.5 font-mono text-sm">
@@ -155,14 +164,14 @@ function MyLicensePage() {
                       onClick={copyReferral}
                       className="mono-label rounded-lg border border-border px-3 py-1.5 text-[0.7rem] transition-colors hover:border-primary/60 hover:text-primary"
                     >
-                      {copied ? "¡Copiado!" : "Copiar"}
+                      {copied ? t("myLicense_copied") : t("myLicense_copyButton")}
                     </button>
                   </div>
                   <Link
                     to="/referral"
                     className="mono-label mt-3 inline-block text-muted-foreground transition-colors hover:text-primary"
                   >
-                    Cómo funciona →
+                    {t("myLicense_howItWorks")}
                   </Link>
                 </div>
               )}

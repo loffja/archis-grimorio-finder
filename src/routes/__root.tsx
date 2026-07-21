@@ -10,22 +10,24 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { LanguageProvider, useLanguage } from "../lib/i18n";
 
 const SITE_URL = "https://www.bnotifier.es";
 
 function NotFoundComponent() {
+  const { t } = useLanguage();
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="surface-card max-w-md p-10 text-center">
         <div className="mono-label text-primary">404</div>
         <h1 className="mt-3 font-display text-3xl font-semibold">
-          Sendero perdido en la niebla.
+          {t("notFoundTitle")}
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Esta página no existe o ya no está disponible.
+          {t("notFoundDesc")}
         </p>
         <a href="/" className="btn-primary mt-6 inline-flex hover:[&]:btn-primary-hover">
-          Volver al inicio
+          {t("backHome")}
           <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -35,19 +37,20 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
+  const { t } = useLanguage();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="surface-card max-w-md p-10 text-center">
-        <h1 className="font-display text-2xl font-semibold text-primary">Algo se ha torcido</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Vuelve a intentarlo.</p>
+        <h1 className="font-display text-2xl font-semibold text-primary">{t("somethingWrong")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("tryAgain")}</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
           className="btn-primary mt-6 hover:[&]:btn-primary-hover"
         >
-          Reintentar
+          {t("retryButton")}
         </button>
       </div>
     </div>
@@ -121,7 +124,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <LanguageProvider>
+        <Outlet />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ServerStatusBadge } from "./ServerStatusBadge";
 import { SystemStatus } from "./SystemStatus";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useLanguage } from "@/lib/i18n";
 
 function LogoMark({ className = "" }: { className?: string }) {
   return (
@@ -15,19 +17,23 @@ function LogoMark({ className = "" }: { className?: string }) {
   );
 }
 
-const NAV_LINKS = [
-  { to: "/live", label: "LIVE" },
-  { to: "/price", label: "PRICING" },
-  { to: "/join", label: "DISCORD" },
-  { to: "/redeem", label: "REDEEM" },
-  { to: "/referral", label: "REFERRAL" },
-  { to: "/my-license", label: "MY LICENSE" },
-] as const;
+function useNavLinks() {
+  const { t } = useLanguage();
+  return [
+    { to: "/live", label: t("navLive") },
+    { to: "/price", label: t("navPricing") },
+    { to: "/join", label: t("navDiscord") },
+    { to: "/redeem", label: t("navRedeem") },
+    { to: "/referral", label: t("navReferral") },
+    { to: "/my-license", label: t("navMyLicense") },
+  ] as const;
+}
 
 function NavMenu() {
+  const navLinks = useNavLinks();
   return (
     <nav aria-label="Principal" className="flex flex-wrap items-center justify-end gap-x-5 gap-y-1">
-      {NAV_LINKS.map((link) => (
+      {navLinks.map((link) => (
         <Link
           key={link.to}
           to={link.to}
@@ -42,6 +48,7 @@ function NavMenu() {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { t } = useLanguage();
   return (
     <div className="relative flex min-h-dvh flex-col">
       {/* Skip link for keyboard users */}
@@ -49,7 +56,7 @@ export function Layout({ children }: { children: ReactNode }) {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:text-primary-foreground"
       >
-        Saltar al contenido
+        {t("skipToContent")}
       </a>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
       <header className="relative z-10 flex flex-wrap items-center justify-between gap-4 px-6 py-3 md:px-10">
@@ -63,11 +70,12 @@ export function Layout({ children }: { children: ReactNode }) {
             <div className="font-display text-base font-semibold tracking-tight">
               Daku<span className="text-primary">Bot</span>
             </div>
-            <div className="mono-label mt-0.5 text-[0.55rem]">Dofus Touch · Archimonster Tracker</div>
+            <div className="mono-label mt-0.5 text-[0.55rem]">{t("headerTagline")}</div>
           </div>
         </Link>
         <div className="flex items-center gap-5">
           <NavMenu />
+          <LanguageSwitcher />
           <ServerStatusBadge />
         </div>
       </header>
@@ -76,9 +84,9 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       <footer className="relative z-10 border-t border-border/60 py-6 text-center">
         <p className="font-mono text-xs text-muted-foreground">
-          © DakuBot {new Date().getFullYear()} — Rastreador para Dofus Touch.{" "}
+          © DakuBot {new Date().getFullYear()} — {t("footerTagline")}{" "}
           <Link to="/terms" className="underline decoration-dotted underline-offset-2 hover:text-primary">
-            Términos y aviso legal
+            {t("footerTerms")}
           </Link>
         </p>
         <div className="mt-2 flex items-center justify-center">

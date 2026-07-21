@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
+import { useLanguage, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/payment")({
   head: () => ({
@@ -14,41 +15,46 @@ export const Route = createFileRoute("/payment")({
   component: PaymentPage,
 });
 
-const METHODS = [
-  {
-    name: "Nequi",
-    tag: "Colombia",
-    d: "Pago rápido si estás en Colombia. Te pasamos el número al coordinar en Discord.",
-  },
-  {
-    name: "Bizum",
-    tag: "España",
-    d: "Para pagos desde España. El número se comparte al coordinar en Discord.",
-  },
-  {
-    name: "Litecoin (LTC)",
-    tag: "Cripto",
-    d: "Pago en cripto, sin importar tu país. La wallet se comparte al coordinar en Discord.",
-  },
+type Method = { name: string; tag: string; d: string };
+
+const METHODS_ES: Method[] = [
+  { name: "Nequi", tag: "Colombia", d: "Pago rápido si estás en Colombia. Te pasamos el número al coordinar en Discord." },
+  { name: "Bizum", tag: "España", d: "Para pagos desde España. El número se comparte al coordinar en Discord." },
+  { name: "Litecoin (LTC)", tag: "Cripto", d: "Pago en cripto, sin importar tu país. La wallet se comparte al coordinar en Discord." },
 ];
 
+const METHODS_FR: Method[] = [
+  { name: "Nequi", tag: "Colombie", d: "Paiement rapide si vous êtes en Colombie. On vous donne le numéro lors de la coordination sur Discord." },
+  { name: "Bizum", tag: "Espagne", d: "Pour les paiements depuis l'Espagne. Le numéro est partagé lors de la coordination sur Discord." },
+  { name: "Litecoin (LTC)", tag: "Crypto", d: "Paiement en crypto, quel que soit votre pays. Le portefeuille est partagé lors de la coordination sur Discord." },
+];
+
+const METHODS_EN: Method[] = [
+  { name: "Nequi", tag: "Colombia", d: "Fast payment if you're in Colombia. We share the number when coordinating on Discord." },
+  { name: "Bizum", tag: "Spain", d: "For payments from Spain. The number is shared when coordinating on Discord." },
+  { name: "Litecoin (LTC)", tag: "Crypto", d: "Crypto payment, no matter your country. The wallet is shared when coordinating on Discord." },
+];
+
+const METHODS_BY_LANG: Record<Lang, Method[]> = { es: METHODS_ES, fr: METHODS_FR, en: METHODS_EN };
+
 function PaymentPage() {
+  const { t, lang } = useLanguage();
+  const methods = METHODS_BY_LANG[lang];
   return (
     <Layout>
       <div className="w-full max-w-2xl">
         <div className="text-center">
-          <span className="mono-label">Pagos</span>
+          <span className="mono-label">{t("payment_label")}</span>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
-            Métodos de <span className="text-primary">pago</span>
+            {t("payment_titlePart1")} <span className="text-primary">{t("payment_titleHighlight")}</span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            Elige el que te quede mejor. Los datos exactos (número o wallet) te los damos
-            directamente al coordinar en Discord — por seguridad, no los publicamos aquí.
+            {t("payment_desc")}
           </p>
         </div>
 
         <div className="mt-8 space-y-3">
-          {METHODS.map((m) => (
+          {methods.map((m) => (
             <div key={m.name} className="surface-card flex items-center justify-between gap-4 p-5">
               <div>
                 <div className="font-display text-base font-semibold">{m.name}</div>
@@ -62,22 +68,22 @@ function PaymentPage() {
         </div>
 
         <div className="surface-card mt-8 p-6 text-center md:p-8">
-          <h2 className="font-display text-lg font-semibold">¿Cómo funciona el pago?</h2>
+          <h2 className="font-display text-lg font-semibold">{t("payment_howItWorksTitle")}</h2>
           <ol className="mx-auto mt-4 max-w-sm space-y-2 text-left text-sm text-muted-foreground">
             <li>
-              <span className="text-primary">1.</span> Elige tu plan en{" "}
+              <span className="text-primary">1.</span> {t("payment_step1Prefix")}{" "}
               <Link to="/price" className="text-primary underline decoration-dotted underline-offset-2">
                 PRICING
               </Link>
             </li>
             <li>
-              <span className="text-primary">2.</span> Únete a Discord y dinos qué plan quieres
+              <span className="text-primary">2.</span> {t("payment_step2")}
             </li>
             <li>
-              <span className="text-primary">3.</span> Te pasamos los datos del método que elijas
+              <span className="text-primary">3.</span> {t("payment_step3")}
             </li>
             <li>
-              <span className="text-primary">4.</span> En cuanto confirmamos el pago, recibes tu clave de licencia
+              <span className="text-primary">4.</span> {t("payment_step4")}
             </li>
           </ol>
           <a
@@ -86,7 +92,7 @@ function PaymentPage() {
             rel="noopener noreferrer"
             className="btn-primary mt-6 hover:[&]:btn-primary-hover"
           >
-            Ir a Discord
+            {t("payment_goToDiscord")}
             <span aria-hidden="true">↗</span>
           </a>
         </div>

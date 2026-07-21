@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
+import { useLanguage, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/position/$id")({
   head: () => ({
@@ -22,35 +23,52 @@ type RevealResult = {
   referralCode?: string;
 };
 
-function formatElapsed(msSince: number): string {
+const AGO_PREFIX: Record<Lang, string> = { es: "hace", fr: "il y a", en: "" };
+const AGO_SUFFIX: Record<Lang, string> = { es: "", fr: "", en: "ago" };
+const UNITS: Record<Lang, { d: string; h: string; min: string; s: string }> = {
+  es: { d: "d", h: "h", min: "min", s: "s" },
+  fr: { d: "j", h: "h", min: "min", s: "s" },
+  en: { d: "d", h: "h", min: "min", s: "s" },
+};
+
+function formatElapsed(msSince: number, lang: Lang): string {
   const totalSeconds = Math.max(0, Math.floor(msSince / 1000));
+  const u = UNITS[lang];
+  let core: string;
   if (totalSeconds < 60) {
-    return `hace ${totalSeconds}s`;
+    core = `${totalSeconds}${u.s}`;
+  } else {
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    if (totalMinutes < 60) {
+      core = `${totalMinutes} ${u.min}`;
+    } else {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      core = `${hours}${u.h} ${minutes}${u.min}`;
+    }
   }
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  if (totalMinutes < 60) {
-    return `hace ${totalMinutes} min`;
-  }
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `hace ${hours}h ${minutes}min`;
+  const prefix = AGO_PREFIX[lang];
+  const suffix = AGO_SUFFIX[lang];
+  return [prefix, core, suffix].filter(Boolean).join(" ");
 }
 
-function formatRemaining(msRemaining: number): string {
-  if (msRemaining <= 0) return "caducada";
+function formatRemaining(msRemaining: number, lang: Lang): string {
+  const u = UNITS[lang];
+  if (msRemaining <= 0) return `0${u.s}`;
   const totalSeconds = Math.floor(msRemaining / 1000);
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  if (days > 0) return `${days}d ${hours}h ${minutes}min`;
-  if (hours > 0) return `${hours}h ${minutes}min ${seconds}s`;
-  if (minutes > 0) return `${minutes}min ${seconds}s`;
-  return `${seconds}s`;
+  if (days > 0) return `${days}${u.d} ${hours}${u.h} ${minutes}${u.min}`;
+  if (hours > 0) return `${hours}${u.h} ${minutes}${u.min} ${seconds}${u.s}`;
+  if (minutes > 0) return `${minutes}${u.min} ${seconds}${u.s}`;
+  return `${seconds}${u.s}`;
 }
 
 function PositionPage() {
+  const { t, lang } = useLanguage();
   const { id } = Route.useParams();
   const [licencia, setLicencia] = useState("");
   const [loading, setLoading] = useState(false);
@@ -84,7 +102,7 @@ function PositionPage() {
         setResult(data);
       }
     } catch {
-      setError("No se pudo contactar con el servidor.");
+      setError(t("couldNotContactServer"));
     } finally {
       setLoading(false);
     }
@@ -103,7 +121,7 @@ function PositionPage() {
             <span className="live-dot" /> ARCHIMONSTER · #{id}
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-5xl">
-            Revela la <span className="text-primary">posición</span>
+            {t("position_titlePart1")} <span className="text-primary">{t("position_titleHighlight")}</span>
           </h1>
         </div>
 
@@ -117,51 +135,50 @@ function PositionPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
-                <div className="mono-label text-primary">TARGET LOCATED</div>
+                <div className="mono-label text-primary">{t("position_targetLocated")}</div>
                 <div className="mt-1 font-display text-3xl font-semibold">{result.name}</div>
               </div>
             </div>
             <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
               <div className="p-5">
-                <div className="mono-label">Servidor</div>
+                <div className="mono-label">{t("position_serverLabel")}</div>
                 <div className="mt-1.5 font-display text-lg font-semibold">{result.server}</div>
               </div>
               <div className="p-5">
-                <div className="mono-label">Posición</div>
+                <div className="mono-label">{t("position_positionLabel")}</div>
                 <div className="mt-1.5 font-mono text-lg font-semibold text-primary">{result.position}</div>
               </div>
             </div>
             {appearedAt && (
               <div className="border-t border-border p-5 text-center">
-                <div className="mono-label">Apareció</div>
+                <div className="mono-label">{t("position_appearedLabel")}</div>
                 <div className="mt-1.5 font-mono text-sm text-muted-foreground">
-                  {formatElapsed(now - appearedAt)} · {new Date(appearedAt).toLocaleString()}
+                  {formatElapsed(now - appearedAt, lang)} · {new Date(appearedAt).toLocaleString()}
                 </div>
               </div>
             )}
             <div className="border-t border-border p-5 text-center">
               <div className="mono-label flex items-center justify-center gap-2">
                 <span className="live-dot" aria-hidden="true" />
-                Tu licencia
+                {t("position_yourLicense")}
               </div>
               <div className="mt-1.5 font-mono text-sm">
                 {licenseExpiresAt ? (
                   <span className={now >= licenseExpiresAt ? "text-destructive" : "text-primary"}>
                     {now >= licenseExpiresAt
-                      ? "Ha caducado"
-                      : `Vence en ${formatRemaining(licenseExpiresAt - now)}`}
+                      ? t("myLicense_expired")
+                      : `${t("myLicense_expiresIn")} ${formatRemaining(licenseExpiresAt - now, lang)}`}
                   </span>
                 ) : (
-                  <span className="text-muted-foreground">Permanente</span>
+                  <span className="text-muted-foreground">{t("permanentLabel")}</span>
                 )}
               </div>
             </div>
             {result.referralCode && (
               <div className="border-t border-border p-5 text-center">
-                <div className="mono-label text-primary">Invita y gana +1 día</div>
+                <div className="mono-label text-primary">{t("position_inviteAndEarn")}</div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                 Comparte tu código. Cuando alguien nuevo lo use al registrarse, tu licencia
-                  gana 1 día extra.
+                 {t("position_shareCodeHint")}
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-2">
                   <span className="rounded-lg border border-border bg-surface-2/50 px-3 py-1.5 font-mono text-sm">
@@ -180,14 +197,14 @@ function PositionPage() {
                     }}
                     className="mono-label rounded-lg border border-border px-3 py-1.5 text-[0.7rem] transition-colors hover:border-primary/60 hover:text-primary"
                   >
-                    {referralCopied ? "¡Copiado!" : "Copiar"}
+                    {referralCopied ? t("myLicense_copied") : t("myLicense_copyButton")}
                   </button>
                 </div>
                 <Link
                   to="/referral"
                   className="mono-label mt-3 inline-block text-muted-foreground transition-colors hover:text-primary"
                 >
-                  Cómo funciona →
+                  {t("myLicense_howItWorks")}
                 </Link>
               </div>
             )}
@@ -211,7 +228,7 @@ function PositionPage() {
             <form onSubmit={onSubmit} className="space-y-5">
               <div>
                 <label htmlFor="licencia" className="mono-label mb-2 block">
-                  Clave de licencia
+                  {t("myLicense_keyLabel")}
                 </label>
                 <input
                   id="licencia"
@@ -229,7 +246,7 @@ function PositionPage() {
                 disabled={loading || !licencia.trim()}
                 className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Revelando…" : "Revelar posición"}
+                {loading ? t("position_revealing") : t("position_revealButton")}
                 {!loading && <span aria-hidden>→</span>}
               </button>
             </form>

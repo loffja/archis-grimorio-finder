@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 
 type Status = "checking" | "online" | "offline";
 
@@ -6,6 +7,7 @@ const CHECK_INTERVAL_MS = 30_000;
 const TIMEOUT_MS = 6_000;
 
 export function SystemStatus() {
+  const { t } = useLanguage();
   const [status, setStatus] = useState<Status>("checking");
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function SystemStatus() {
   }, []);
 
   const label =
-    status === "online" ? "Sistema operativo" : status === "offline" ? "Sistema caído" : "Comprobando…";
+    status === "online" ? t("systemStatus_operational") : status === "offline" ? t("systemStatus_down") : t("systemStatus_checking");
 
   const dotStyle =
     status === "online"

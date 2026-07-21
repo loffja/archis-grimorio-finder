@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
+import { useLanguage } from "@/lib/i18n";
 
 export const Route = createFileRoute("/redeem")({
   head: () => ({
@@ -30,6 +31,7 @@ function RedeemPage() {
 }
 
 function RedeemForm() {
+  const { t } = useLanguage();
   const [code, setCode] = useState("");
   const [pcId, setPcId] = useState("");
   const [website, setWebsite] = useState(""); // honeypot — debe quedar vacío
@@ -56,7 +58,7 @@ function RedeemForm() {
         setResult(data);
       }
     } catch {
-      setError("No se pudo contactar con el servidor.");
+      setError(t("couldNotContactServer"));
     } finally {
       setLoading(false);
     }
@@ -76,19 +78,18 @@ function RedeemForm() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center">
-        <span className="mono-label">Canjear código</span>
+        <span className="mono-label">{t("redeem_label")}</span>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
-          Tu <span className="text-primary">licencia</span>
+          {t("redeem_titlePart1")} <span className="text-primary">{t("redeem_titleHighlight")}</span>
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Introduce tu código promocional y tu PC ID para generar una licencia
-          al instante.
+          {t("redeem_desc")}
         </p>
       </div>
 
       {result ? (
         <div className="surface-card mt-8 p-6 text-center md:p-8">
-          <div className="mono-label text-primary">LICENCIA GENERADA</div>
+          <div className="mono-label text-primary">{t("redeem_generatedLabel")}</div>
           <div className="mt-3 break-all rounded-lg border border-border bg-surface-2/50 p-4 font-mono text-lg font-semibold">
             {result.licencia}
           </div>
@@ -97,15 +98,15 @@ function RedeemForm() {
             onClick={copyLicense}
             className="btn-primary mt-4 w-full justify-center hover:[&]:btn-primary-hover"
           >
-            {copied ? "¡Copiada!" : "Copiar licencia"}
+            {copied ? t("redeem_copied") : t("redeem_copyButton")}
           </button>
           <p className="mono-label mt-4 text-muted-foreground">
             {result.expiresAt
-              ? `Caduca: ${new Date(result.expiresAt).toLocaleString()}`
-              : "Licencia permanente"}
+              ? `${t("redeem_expiresLabel")}: ${new Date(result.expiresAt).toLocaleString()}`
+              : t("permanentLabel")}
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
-            Guárdala ahora — no podrás volver a verla desde aquí.
+            {t("redeem_saveNowWarning")}
           </p>
         </div>
       ) : (
@@ -136,7 +137,7 @@ function RedeemForm() {
             </div>
             <div>
               <label htmlFor="code" className="mono-label mb-2 block">
-                Código promocional
+                {t("redeem_promoCodeLabel")}
               </label>
               <input
                 id="code"
@@ -165,7 +166,7 @@ function RedeemForm() {
             </div>
             <div>
               <label htmlFor="referralcode" className="mono-label mb-2 block">
-                Código de referido (opcional)
+                {t("referralCodeLabel")}
               </label>
               <input
                 id="referralcode"
@@ -177,7 +178,7 @@ function RedeemForm() {
                 className="field focus:[&]:field-focus"
               />
               <p className="mono-label mt-2 text-muted-foreground">
-                ¿Alguien te invitó? Pon su código aquí.
+                {t("redeem_referralHint")}
               </p>
             </div>
             <button
@@ -185,7 +186,7 @@ function RedeemForm() {
               disabled={loading || !code.trim() || !pcId.trim()}
               className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "Canjeando…" : "Canjear código"}
+              {loading ? t("redeem_redeeming") : t("redeem_redeemButton")}
               {!loading && <span aria-hidden>→</span>}
             </button>
           </form>

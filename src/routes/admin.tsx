@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LanguageProvider, useLanguage } from "@/lib/i18n";
+import { useLanguage } from "@/lib/i18n";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -101,14 +100,6 @@ function generateLicenseKey(): string {
 }
 
 function AdminPage() {
-  return (
-    <LanguageProvider>
-      <AdminPageInner />
-    </LanguageProvider>
-  );
-}
-
-function AdminPageInner() {
   const { t } = useLanguage();
   const [adminKey, setAdminKey] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -148,9 +139,6 @@ function AdminPageInner() {
         <AdminPanel adminKey={adminKey} onUnauthorized={handleUnauthorized} onLogout={handleLogout} />
       ) : (
         <div className="w-full max-w-md">
-          <div className="mb-4 flex justify-end">
-            <LanguageSwitcher />
-          </div>
           <div className="surface-card p-6 md:p-8">
             <span className="mono-label">{t("adminPanelLabel")}</span>
             <h1 className="mt-2 font-display text-2xl font-semibold">{t("restrictedAccessTitle")}</h1>
@@ -720,7 +708,6 @@ function AdminPanel({
           <h1 className="mt-2 text-4xl font-semibold tracking-tight">{t("licensesTitle")}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <LanguageSwitcher />
           <div className="surface-card px-4 py-3">
             <div className="mono-label">{t("totalLabel")}</div>
             <div className="mt-1 font-display text-2xl font-semibold">{licencias.length}</div>

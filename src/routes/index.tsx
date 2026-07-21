@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
+import { useLanguage } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -84,39 +85,39 @@ function DofusRadar() {
 }
 
 function Index() {
+  const { t } = useLanguage();
   return (
     <Layout>
       <div className="w-full max-w-3xl">
         <div className="text-center">
           <span className="badge-dot">
-            <span className="live-dot" aria-hidden="true" /> Dofus Touch · Posiciones en vivo
+            <span className="live-dot" aria-hidden="true" /> {t("home_liveBadge")}
           </span>
           <div className="mt-2">
             <span className="mono-label rounded-full border border-primary/40 px-3 py-1 text-primary">
-              100% de cobertura del Ocre
+              {t("home_coverageBadge")}
             </span>
           </div>
           <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-            Caza cada <span className="text-gradient">archimonstruo</span>
-            <br className="hidden sm:block" /> antes de que huya.
+            {t("home_titlePart1")} <span className="text-gradient">{t("home_titleHighlight")}</span>
+            <br className="hidden sm:block" /> {t("home_titlePart2")}
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
-            <strong className="text-foreground">DakuBot</strong> te entrega coordenadas exactas y en tiempo real
-            de los archimonstruos de Dofus Touch, directo desde nuestro pathfinder.
+            <strong className="text-foreground">DakuBot</strong> {t("home_desc")}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/join"
               className="btn-primary hover:[&]:btn-primary-hover"
             >
-              Ingresar
+              {t("home_enterButton")}
               <span aria-hidden="true">→</span>
             </Link>
             <Link
               to="/how-it-works"
               className="mono-label rounded-lg border border-primary/40 px-4 py-2.5 text-primary transition-colors hover:border-primary hover:bg-primary/10"
             >
-              Cómo funciona
+              {t("home_howItWorks")}
             </Link>
           </div>
         </div>
@@ -124,18 +125,18 @@ function Index() {
         <DofusRadar />
 
         <div className="surface-card mt-6 p-5 text-center">
-          <div className="mono-label">Desde</div>
+          <div className="mono-label">{t("home_fromLabel")}</div>
           <div className="font-display text-2xl font-semibold text-primary">
-            $6 USD<span className="text-sm font-normal text-muted-foreground">/día</span>
+            $6 USD<span className="text-sm font-normal text-muted-foreground">{t("home_perDay")}</span>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            El plan mensual es tu mejor precio por día.
+            {t("home_monthlyBestPrice")}
           </p>
           <Link
             to="/price"
             className="mono-label mt-3 inline-flex items-center gap-1 text-primary transition-colors hover:text-primary/70"
           >
-            Ver todos los planes →
+            {t("home_seeAllPlans")}
           </Link>
         </div>
         <div className="mt-3 text-center">
@@ -143,7 +144,7 @@ function Index() {
             to="/how-it-works"
             className="mono-label text-muted-foreground transition-colors hover:text-primary"
           >
-            Ver guía completa →
+            {t("home_seeFullGuide")}
           </Link>
         </div>
       </div>
