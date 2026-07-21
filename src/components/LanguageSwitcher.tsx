@@ -1,5 +1,42 @@
 import { useEffect, useRef, useState } from "react";
-import { LANGUAGES, useLanguage } from "@/lib/i18n";
+import { LANGUAGES, useLanguage, type Lang } from "@/lib/i18n";
+
+function FlagES() {
+  return (
+    <svg viewBox="0 0 20 14" width="20" height="14" role="img" aria-hidden="true">
+      <rect width="20" height="14" fill="#c60b1e" />
+      <rect y="3.5" width="20" height="7" fill="#ffc400" />
+    </svg>
+  );
+}
+
+function FlagFR() {
+  return (
+    <svg viewBox="0 0 20 14" width="20" height="14" role="img" aria-hidden="true">
+      <rect width="20" height="14" fill="#ffffff" />
+      <rect width="6.66" height="14" fill="#0055a4" />
+      <rect x="13.33" width="6.67" height="14" fill="#ef4135" />
+    </svg>
+  );
+}
+
+function FlagUS() {
+  return (
+    <svg viewBox="0 0 20 14" width="20" height="14" role="img" aria-hidden="true">
+      <rect width="20" height="14" fill="#ffffff" />
+      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+        <rect key={i} y={i * (14 / 13) * 2} width="20" height={14 / 13} fill="#b22234" />
+      ))}
+      <rect width="8.6" height="7.5" fill="#3c3b6e" />
+    </svg>
+  );
+}
+
+const FLAGS: Record<Lang, () => React.ReactElement> = {
+  es: FlagES,
+  fr: FlagFR,
+  en: FlagUS,
+};
 
 export function LanguageSwitcher() {
   const { lang, setLang, t } = useLanguage();
@@ -25,6 +62,7 @@ export function LanguageSwitcher() {
 
   const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0];
   const others = LANGUAGES.filter((l) => l.code !== lang);
+  const CurrentFlag = FLAGS[current.code];
 
   return (
     <div ref={wrapperRef} className="relative flex items-center">
@@ -36,9 +74,11 @@ export function LanguageSwitcher() {
           aria-haspopup="true"
           aria-label={t("languageSelectorLabel")}
           title={current.label}
-          className="flex h-8 w-9 items-center justify-center text-base leading-none transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="flex h-8 w-9 items-center justify-center transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <span aria-hidden="true">{current.flag}</span>
+          <span className="overflow-hidden rounded-[2px]">
+            <CurrentFlag />
+          </span>
         </button>
         <div
           className="flex items-center transition-[max-width,opacity] duration-200 ease-out"
@@ -48,22 +88,27 @@ export function LanguageSwitcher() {
             overflow: "hidden",
           }}
         >
-          {others.map((l) => (
-            <button
-              key={l.code}
-              type="button"
-              onClick={() => {
-                setLang(l.code);
-                setOpen(false);
-              }}
-              aria-label={l.label}
-              title={l.label}
-              tabIndex={open ? 0 : -1}
-              className="flex h-8 w-9 shrink-0 items-center justify-center border-l border-border text-base leading-none transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <span aria-hidden="true">{l.flag}</span>
-            </button>
-          ))}
+          {others.map((l) => {
+            const Flag = FLAGS[l.code];
+            return (
+              <button
+                key={l.code}
+                type="button"
+                onClick={() => {
+                  setLang(l.code);
+                  setOpen(false);
+                }}
+                aria-label={l.label}
+                title={l.label}
+                tabIndex={open ? 0 : -1}
+                className="flex h-8 w-9 shrink-0 items-center justify-center border-l border-border transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <span className="overflow-hidden rounded-[2px]">
+                  <Flag />
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

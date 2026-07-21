@@ -9,10 +9,10 @@ import {
 
 export type Lang = "es" | "fr" | "en";
 
-export const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "en", label: "English", flag: "🇺🇸" },
+export const LANGUAGES: { code: Lang; label: string }[] = [
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "en", label: "English" },
 ];
 
 const STORAGE_KEY = "bnotifier-lang";
@@ -267,6 +267,13 @@ const es: Dict = {
   live_previewLabel: "🔧 Vista previa",
   live_previewDesc: "Así se ve LIVE cuando el bot está activo. Los archimonstruos de abajo son de ejemplo.",
   live_viewPosition: "Ver posición →",
+
+  statusBadge_ariaLabel: "Estado del servidor: en línea, ping {ping} milisegundos, {players} jugadores en línea",
+  statusBadge_online: "ONLINE",
+  statusBadge_players: "jugadores",
+  systemStatus_operational: "Sistema operativo",
+  systemStatus_down: "Sistema caído",
+  systemStatus_checking: "Comprobando…",
 };
 
 const fr: Dict = {
@@ -517,6 +524,13 @@ const fr: Dict = {
   live_previewLabel: "🔧 Aperçu",
   live_previewDesc: "Voici à quoi ressemble LIVE quand le bot est actif. Les archimonstres ci-dessous sont des exemples.",
   live_viewPosition: "Voir la position →",
+
+  statusBadge_ariaLabel: "État du serveur : en ligne, ping {ping} millisecondes, {players} joueurs en ligne",
+  statusBadge_online: "EN LIGNE",
+  statusBadge_players: "joueurs",
+  systemStatus_operational: "Système opérationnel",
+  systemStatus_down: "Système hors service",
+  systemStatus_checking: "Vérification…",
 };
 
 const en: Dict = {
@@ -767,6 +781,13 @@ const en: Dict = {
   live_previewLabel: "🔧 Preview",
   live_previewDesc: "This is what LIVE looks like when the bot is active. The archmonsters below are examples.",
   live_viewPosition: "View position →",
+
+  statusBadge_ariaLabel: "Server status: online, ping {ping} milliseconds, {players} players online",
+  statusBadge_online: "ONLINE",
+  statusBadge_players: "players",
+  systemStatus_operational: "System operational",
+  systemStatus_down: "System down",
+  systemStatus_checking: "Checking…",
 };
 
 const dictionaries: Record<Lang, Dict> = { es, fr, en };
