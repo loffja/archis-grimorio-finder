@@ -91,7 +91,7 @@ function MyLicensePage() {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
             {t("myLicense_titlePart1")} <span className="text-primary">{t("myLicense_titleHighlight")}</span>
           </h1>
-          <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
+          <p className="mx-auto mt-3 min-h-[2.5rem] max-w-sm text-sm text-muted-foreground">
             {t("myLicense_desc")}
           </p>
         </div>

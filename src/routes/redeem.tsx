@@ -82,7 +82,7 @@ function RedeemForm() {
         <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
           {t("redeem_titlePart1")} <span className="text-primary">{t("redeem_titleHighlight")}</span>
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mx-auto mt-2 min-h-[2.5rem] max-w-sm text-sm text-muted-foreground">
           {t("redeem_desc")}
         </p>
       </div>
