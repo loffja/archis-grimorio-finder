@@ -16,9 +16,6 @@ function Index() {
             <span className="badge-dot">
               <span className="live-dot" aria-hidden="true" /> {t("home_liveBadge")}
             </span>
-            <span className="mono-label rounded-full border border-primary/40 px-3 py-1 text-primary">
-              {t("home_coverageBadge")}
-            </span>
           </div>
           <h1
             className="mx-auto mt-4 max-w-xl text-4xl font-semibold leading-[1.1] tracking-tight md:text-6xl"
