@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useLanguage } from "@/lib/i18n";
-import { Turnstile } from "@/components/Turnstile";
+import { Turnstile, TURNSTILE_ENABLED } from "@/components/Turnstile";
 
 export const Route = createFileRoute("/redeem")({
   head: () => ({
@@ -186,7 +186,7 @@ function RedeemForm() {
             <Turnstile onVerify={setTurnstileToken} />
             <button
               type="submit"
-              disabled={loading || !code.trim() || !pcId.trim()}
+              disabled={loading || !code.trim() || !pcId.trim() || (TURNSTILE_ENABLED && !turnstileToken)}
               className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? t("redeem_redeeming") : t("redeem_redeemButton")}

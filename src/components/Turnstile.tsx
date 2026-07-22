@@ -19,6 +19,7 @@ declare global {
 }
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+export const TURNSTILE_ENABLED = Boolean(SITE_KEY);
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
 let scriptPromise: Promise<void> | null = null;

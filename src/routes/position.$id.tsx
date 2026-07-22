@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { useLanguage, type Lang } from "@/lib/i18n";
 import { translateArchmonsterName } from "@/lib/archmonster-names";
 import { handleMonsterImgError } from "@/lib/monster-image";
-import { Turnstile } from "@/components/Turnstile";
+import { Turnstile, TURNSTILE_ENABLED } from "@/components/Turnstile";
 
 export const Route = createFileRoute("/position/$id")({
   head: () => ({
@@ -249,7 +249,7 @@ function PositionPage() {
               <Turnstile onVerify={setTurnstileToken} />
               <button
                 type="submit"
-                disabled={loading || !licencia.trim()}
+                disabled={loading || !licencia.trim() || (TURNSTILE_ENABLED && !turnstileToken)}
                 className="btn-primary w-full justify-center hover:[&]:btn-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? t("position_revealing") : t("position_revealButton")}
