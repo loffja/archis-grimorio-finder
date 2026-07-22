@@ -274,6 +274,8 @@ const es: Dict = {
   systemStatus_operational: "Sistema operativo",
   systemStatus_down: "Sistema caído",
   systemStatus_checking: "Comprobando…",
+  home_statsToday: "{count} archimonstruos detectados hoy",
+  home_statsLicenses: "{count} licencias activas",
 };
 
 const fr: Dict = {
@@ -531,6 +533,8 @@ const fr: Dict = {
   systemStatus_operational: "Système opérationnel",
   systemStatus_down: "Système hors service",
   systemStatus_checking: "Vérification…",
+  home_statsToday: "{count} archimonstres détectés aujourd'hui",
+  home_statsLicenses: "{count} licences actives",
 };
 
 const en: Dict = {
@@ -788,6 +792,8 @@ const en: Dict = {
   systemStatus_operational: "System operational",
   systemStatus_down: "System down",
   systemStatus_checking: "Checking…",
+  home_statsToday: "{count} archmonsters detected today",
+  home_statsLicenses: "{count} active licenses",
 };
 
 const dictionaries: Record<Lang, Dict> = { es, fr, en };

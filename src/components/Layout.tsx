@@ -174,6 +174,15 @@ export function Layout({
           <Link to="/terms" className="underline decoration-dotted underline-offset-2 hover:text-primary">
             {t("footerTerms")}
           </Link>
+          {" · "}
+          <a
+            href="https://discord.gg/4FRsf4uyV6"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-dotted underline-offset-2 hover:text-primary"
+          >
+            Discord
+          </a>
         </p>
         <div className="mt-2 flex items-center justify-center">
           <SystemStatus />

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useLanguage } from "@/lib/i18n";
 
@@ -6,11 +7,40 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+type Stats = {
+  archimonstrosHoy: number;
+  licenciasActivas: number;
+  masBuscado: { name: string } | null;
+};
+
 function Index() {
   const { t } = useLanguage();
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("https://api.bnotifier.es/stats")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setStats(data);
+      })
+      .catch(() => {
+        // Si falla, simplemente no se muestra la fila de estadísticas.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <Layout noScroll align="start">
-      <div className="w-full max-w-2xl">
+      <div className="relative w-full max-w-2xl">
+        {/* Adorno decorativo de fondo — no ocupa espacio en el layout */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl"
+          aria-hidden="true"
+        />
+
         <div className="text-center">
           <div className="flex flex-col items-center gap-2">
             <span className="badge-dot">
@@ -42,10 +72,24 @@ function Index() {
               {t("home_howItWorks")}
             </Link>
           </div>
+
+          {stats && (
+            <div className="mono-label mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[0.65rem] text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="live-dot" aria-hidden="true" />
+                {t("home_statsToday", { count: stats.archimonstrosHoy })}
+              </span>
+              <span className="hidden h-3 w-px bg-border sm:block" aria-hidden="true" />
+              <span className="text-primary">
+                {t("home_statsLicenses", { count: stats.licenciasActivas })}
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="surface-card relative mt-8 overflow-hidden border-primary/40 p-6 text-center md:p-8">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+        <div className="surface-card relative mt-6 overflow-hidden border-primary/60 p-6 text-center shadow-[0_0_40px_-12px_rgba(255,45,135,0.35)] md:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
           <div className="relative">
             <div className="mono-label text-primary">{t("home_fromLabel")}</div>
             <div className="font-display text-4xl font-semibold text-primary md:text-5xl">
