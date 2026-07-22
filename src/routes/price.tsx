@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useLanguage, type Lang } from "@/lib/i18n";
+import { useExchangeRates, formatConverted } from "@/lib/exchange-rates";
 
 export const Route = createFileRoute("/price")({
   head: () => ({
@@ -15,26 +16,26 @@ export const Route = createFileRoute("/price")({
   component: PricePage,
 });
 
-type Plan = { name: string; cop: string; usd: string; eur: string; tag: string | null; savings: string | null; blurb: string };
+type Plan = { name: string; usd: number; tag: string | null; savings: string | null; blurb: string };
 type Reason = { t: string; d: string };
 type FaqItem = { q: string; a: string };
 
 const PLANS_ES: Plan[] = [
-  { name: "1 día", cop: "19.000", usd: "6", eur: "5", tag: null, savings: null, blurb: "Para probar el servicio o una sesión intensiva puntual." },
-  { name: "7 días", cop: "46.000", usd: "14", eur: "12", tag: null, savings: "Ahorras un 67%", blurb: "Cubre un fin de semana largo o una semana completa de farmeo." },
-  { name: "30 días", cop: "106.000", usd: "32", eur: "28", tag: "Mejor precio", savings: "Ahorras un 82%", blurb: "El mejor precio por día. Tiempo de sobra para terminar el Ocre sin prisa." },
+  { name: "1 día", usd: 6, tag: null, savings: null, blurb: "Para probar el servicio o una sesión intensiva puntual." },
+  { name: "7 días", usd: 14, tag: null, savings: "Ahorras un 67%", blurb: "Cubre un fin de semana largo o una semana completa de farmeo." },
+  { name: "30 días", usd: 32, tag: "Mejor precio", savings: "Ahorras un 82%", blurb: "El mejor precio por día. Tiempo de sobra para terminar el Ocre sin prisa." },
 ];
 
 const PLANS_FR: Plan[] = [
-  { name: "1 jour", cop: "19.000", usd: "6", eur: "5", tag: null, savings: null, blurb: "Pour tester le service ou pour une session intensive ponctuelle." },
-  { name: "7 jours", cop: "46.000", usd: "14", eur: "12", tag: null, savings: "Économisez 67%", blurb: "Couvre un long week-end ou une semaine complète de farming." },
-  { name: "30 jours", cop: "106.000", usd: "32", eur: "28", tag: "Meilleur prix", savings: "Économisez 82%", blurb: "Le meilleur prix par jour. Largement le temps de terminer l'Ocre sans se presser." },
+  { name: "1 jour", usd: 6, tag: null, savings: null, blurb: "Pour tester le service ou pour une session intensive ponctuelle." },
+  { name: "7 jours", usd: 14, tag: null, savings: "Économisez 67%", blurb: "Couvre un long week-end ou une semaine complète de farming." },
+  { name: "30 jours", usd: 32, tag: "Meilleur prix", savings: "Économisez 82%", blurb: "Le meilleur prix par jour. Largement le temps de terminer l'Ocre sans se presser." },
 ];
 
 const PLANS_EN: Plan[] = [
-  { name: "1 day", cop: "19.000", usd: "6", eur: "5", tag: null, savings: null, blurb: "To try the service or for a one-off intensive session." },
-  { name: "7 days", cop: "46.000", usd: "14", eur: "12", tag: null, savings: "Save 67%", blurb: "Covers a long weekend or a full week of farming." },
-  { name: "30 days", cop: "106.000", usd: "32", eur: "28", tag: "Best price", savings: "Save 82%", blurb: "The best price per day. Plenty of time to finish the Ocre without rushing." },
+  { name: "1 day", usd: 6, tag: null, savings: null, blurb: "To try the service or for a one-off intensive session." },
+  { name: "7 days", usd: 14, tag: null, savings: "Save 67%", blurb: "Covers a long weekend or a full week of farming." },
+  { name: "30 days", usd: 32, tag: "Best price", savings: "Save 82%", blurb: "The best price per day. Plenty of time to finish the Ocre without rushing." },
 ];
 
 const REASONS_ES: Reason[] = [
@@ -82,6 +83,7 @@ function PricePage() {
   const plans = PLANS_BY_LANG[lang];
   const reasons = REASONS_BY_LANG[lang];
   const faq = FAQ_BY_LANG[lang];
+  const { rates } = useExchangeRates();
   return (
     <Layout>
       <div className="w-full max-w-4xl">
@@ -116,7 +118,7 @@ function PricePage() {
                   <span className="ml-1 text-base font-normal text-muted-foreground">USD</span>
                 </div>
                 <div className="mono-label mt-1 text-muted-foreground">
-                  €{p.eur} · ${p.cop} COP
+                  €{formatConverted(p.usd, rates.eur)} · ${formatConverted(p.usd, rates.cop)} COP
                 </div>
               </div>
               <p className="mt-4 flex-1 text-center text-sm text-muted-foreground">{p.blurb}</p>

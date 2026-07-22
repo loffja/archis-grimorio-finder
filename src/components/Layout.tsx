@@ -1,8 +1,29 @@
 import { useState, useEffect, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { SystemStatus } from "./SystemStatus";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/lib/i18n";
+
+// Atajo oculto: Ctrl/Cmd + Shift + A, desde cualquier página, lleva directo
+// al panel de admin. No hay ningún rastro visible de esto en la interfaz.
+function useHiddenAdminShortcut() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const modifier = e.ctrlKey || e.metaKey;
+      if (!modifier || !e.shiftKey || e.key.toLowerCase() !== "a") return;
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        target &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+      if (isTyping) return;
+      e.preventDefault();
+      navigate({ to: "/admin" });
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [navigate]);
+}
 
 function LogoMark({ className = "" }: { className?: string }) {
   return (
@@ -123,6 +144,7 @@ export function Layout({
   align?: "center" | "start";
 }) {
   const { t } = useLanguage();
+  useHiddenAdminShortcut();
   return (
     <div
       className={

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useLanguage } from "@/lib/i18n";
+import { Turnstile } from "@/components/Turnstile";
 
 export const Route = createFileRoute("/redeem")({
   head: () => ({
@@ -40,6 +41,7 @@ function RedeemForm() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RedeemResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +51,7 @@ function RedeemForm() {
       const res = await fetch("https://api.bnotifier.es/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, pc_id: pcId, website, referralCode: referralCode.trim() || undefined }),
+        body: JSON.stringify({ code, pc_id: pcId, website, referralCode: referralCode.trim() || undefined, turnstileToken }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -181,6 +183,7 @@ function RedeemForm() {
                 {t("redeem_referralHint")}
               </p>
             </div>
+            <Turnstile onVerify={setTurnstileToken} />
             <button
               type="submit"
               disabled={loading || !code.trim() || !pcId.trim()}

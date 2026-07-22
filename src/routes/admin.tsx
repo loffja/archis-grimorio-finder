@@ -108,19 +108,19 @@ function AdminPage() {
   const [keyInput, setKeyInput] = useState("");
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) setAdminKey(stored);
   }, []);
 
   const handleUnauthorized = useCallback(() => {
-    sessionStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
     setAdminKey(null);
     setKeyInput("");
     setLoginError(t("invalidKeyError"));
   }, [t]);
 
   const handleLogout = useCallback(() => {
-    sessionStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
     setAdminKey(null);
     setKeyInput("");
     setLoginError(null);
@@ -130,13 +130,13 @@ function AdminPage() {
     e.preventDefault();
     const value = keyInput.trim();
     if (!value) return;
-    sessionStorage.setItem(STORAGE_KEY, value);
+    localStorage.setItem(STORAGE_KEY, value);
     setAdminKey(value);
     setLoginError(null);
   }
 
   return (
-    <Layout>
+    <Layout align="start">
       {adminKey ? (
         <AdminPanel adminKey={adminKey} onUnauthorized={handleUnauthorized} onLogout={handleLogout} />
       ) : (

@@ -139,7 +139,7 @@ const es: Dict = {
   navRedeem: "CANJEAR",
   navReferral: "REFERIDOS",
   navMyLicense: "MI LICENCIA",
-  headerTagline: "Dofus Touch · Rastreador de archimonstruos",
+  headerTagline: "Dofus Touch · Servidor Blair",
   footerTagline: "Rastreador para Dofus Touch.",
   footerTerms: "Términos y aviso legal",
   skipToContent: "Saltar al contenido",
@@ -276,6 +276,7 @@ const es: Dict = {
   systemStatus_checking: "Comprobando…",
   home_statsToday: "{count} archimonstruos detectados hoy",
   home_statsLicenses: "{count} licencias activas",
+  home_serverExclusive: "Exclusivo del servidor {server}",
 };
 
 const fr: Dict = {
@@ -398,7 +399,7 @@ const fr: Dict = {
   navRedeem: "ÉCHANGER",
   navReferral: "PARRAINAGE",
   navMyLicense: "MA LICENCE",
-  headerTagline: "Dofus Touch · Traqueur d'archimonstres",
+  headerTagline: "Dofus Touch · Serveur Blair",
   footerTagline: "Traqueur pour Dofus Touch.",
   footerTerms: "Conditions et mentions légales",
   skipToContent: "Aller au contenu",
@@ -535,6 +536,7 @@ const fr: Dict = {
   systemStatus_checking: "Vérification…",
   home_statsToday: "{count} archimonstres détectés aujourd'hui",
   home_statsLicenses: "{count} licences actives",
+  home_serverExclusive: "Exclusif au serveur {server}",
 };
 
 const en: Dict = {
@@ -657,7 +659,7 @@ const en: Dict = {
   navRedeem: "REDEEM",
   navReferral: "REFERRAL",
   navMyLicense: "MY LICENSE",
-  headerTagline: "Dofus Touch · Archmonster Tracker",
+  headerTagline: "Dofus Touch · Blair Server",
   footerTagline: "Tracker for Dofus Touch.",
   footerTerms: "Terms and legal notice",
   skipToContent: "Skip to content",
@@ -794,6 +796,7 @@ const en: Dict = {
   systemStatus_checking: "Checking…",
   home_statsToday: "{count} archmonsters detected today",
   home_statsLicenses: "{count} active licenses",
+  home_serverExclusive: "Exclusive to the {server} server",
 };
 
 const dictionaries: Record<Lang, Dict> = { es, fr, en };

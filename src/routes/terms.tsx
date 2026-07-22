@@ -49,6 +49,13 @@ const SECTIONS_ES: Section[] = [
     ],
   },
   {
+    t: "Uso prohibido de los datos",
+    body: [
+      "Queda prohibido automatizar, hacer scraping, o extraer de forma masiva las posiciones de archimonstruos u otros datos del servicio para redistribuirlos, revenderlos o publicarlos en otro sitio, bot, servidor de Discord o canal ajeno a DakuBot, con o sin fines de lucro.",
+      "El incumplimiento de esta cláusula supone la revocación inmediata de la licencia implicada, sin derecho a reembolso, y puede derivar en el bloqueo permanente del acceso al servicio.",
+    ],
+  },
+  {
     t: "Disponibilidad del servicio",
     body: [
       "DakuBot se ofrece \"tal cual\", sin garantía de disponibilidad continua. El servicio puede modificarse, pausarse o cerrarse en cualquier momento, sin aviso previo.",
@@ -97,6 +104,13 @@ const SECTIONS_FR: Section[] = [
     ],
   },
   {
+    t: "Usage interdit des données",
+    body: [
+      "Il est interdit d'automatiser, de scraper ou d'extraire massivement les positions d'archimonstres ou d'autres données du service pour les redistribuer, les revendre ou les publier sur un autre site, bot, serveur Discord ou canal externe à DakuBot, à but lucratif ou non.",
+      "Le non-respect de cette clause entraîne la révocation immédiate de la licence concernée, sans droit à remboursement, et peut entraîner un blocage permanent de l'accès au service.",
+    ],
+  },
+  {
     t: "Disponibilité du service",
     body: [
       "DakuBot est fourni « tel quel », sans garantie de disponibilité continue. Le service peut être modifié, suspendu ou fermé à tout moment, sans préavis.",
@@ -142,6 +156,13 @@ const SECTIONS_EN: Section[] = [
     body: [
       "The process of obtaining licenses (payment, key delivery) is handled manually or via promo codes, outside of an automated billing system. Refunds are not guaranteed unless expressly agreed on a case-by-case basis.",
       "We reserve the right to revoke any license in case of misuse, system abuse, or breach of these terms.",
+    ],
+  },
+  {
+    t: "Prohibited use of data",
+    body: [
+      "Automating, scraping, or bulk-extracting archmonster positions or other service data to redistribute, resell, or publish them on another site, bot, Discord server, or channel outside of DakuBot is prohibited, whether for profit or not.",
+      "Breaching this clause results in immediate revocation of the license involved, with no right to a refund, and may lead to a permanent block of access to the service.",
     ],
   },
   {

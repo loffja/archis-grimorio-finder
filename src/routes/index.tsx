@@ -42,7 +42,7 @@ function Index() {
         />
 
         <div className="text-center">
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="badge-dot">
               <span className="live-dot" aria-hidden="true" /> {t("home_liveBadge")}
             </span>

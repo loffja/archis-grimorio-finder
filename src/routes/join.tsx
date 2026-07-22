@@ -15,7 +15,7 @@ export const Route = createFileRoute("/join")({
 function Join() {
   const { t } = useLanguage();
   return (
-    <Layout noScroll>
+    <Layout noScroll align="start">
       <div className="w-full max-w-xl">
         <div className="surface-card relative overflow-hidden p-8 text-center md:p-10">
           <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />

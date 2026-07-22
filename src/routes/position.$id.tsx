@@ -4,6 +4,7 @@ import { Layout } from "@/components/Layout";
 import { useLanguage, type Lang } from "@/lib/i18n";
 import { translateArchmonsterName } from "@/lib/archmonster-names";
 import { handleMonsterImgError } from "@/lib/monster-image";
+import { Turnstile } from "@/components/Turnstile";
 
 export const Route = createFileRoute("/position/$id")({
   head: () => ({
@@ -78,6 +79,7 @@ function PositionPage() {
   const [result, setResult] = useState<RevealResult | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [referralCopied, setReferralCopied] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // Para que "hace X min" y la cuenta atrás de la licencia sigan
   // actualizándose solas mientras el usuario mira la página.
@@ -95,7 +97,7 @@ function PositionPage() {
       const res = await fetch("https://api.bnotifier.es/validateLicencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ licencia, archimonsterId: id }),
+        body: JSON.stringify({ licencia, archimonsterId: id, turnstileToken }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -244,6 +246,7 @@ function PositionPage() {
                   placeholder="XXXX-XXXX-XXXX"
                 />
               </div>
+              <Turnstile onVerify={setTurnstileToken} />
               <button
                 type="submit"
                 disabled={loading || !licencia.trim()}

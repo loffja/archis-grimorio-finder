@@ -9,14 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as JoinRouteImport } from './routes/join'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ARouteImport } from './routes/a'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as JoinRouteImport } from './routes/join'
+import { Route as LiveRouteImport } from './routes/live'
+import { Route as MyLicenseRouteImport } from './routes/my-license'
+import { Route as PaymentRouteImport } from './routes/payment'
+import { Route as PriceRouteImport } from './routes/price'
+import { Route as RedeemRouteImport } from './routes/redeem'
+import { Route as ReferralRouteImport } from './routes/referral'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PositionIdRouteImport } from './routes/position.$id'
 
-const JoinRoute = JoinRouteImport.update({
-  id: '/join',
-  path: '/join',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ARoute = ARouteImport.update({
+  id: '/a',
+  path: '/a',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -24,9 +38,49 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyLicenseRoute = MyLicenseRouteImport.update({
+  id: '/my-license',
+  path: '/my-license',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentRoute = PaymentRouteImport.update({
+  id: '/payment',
+  path: '/payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PriceRoute = PriceRouteImport.update({
+  id: '/price',
+  path: '/price',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedeemRoute = RedeemRouteImport.update({
+  id: '/redeem',
+  path: '/redeem',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferralRoute = ReferralRouteImport.update({
+  id: '/referral',
+  path: '/referral',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PositionIdRoute = PositionIdRouteImport.update({
@@ -37,45 +91,128 @@ const PositionIdRoute = PositionIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/a': typeof ARoute
   '/admin': typeof AdminRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/join': typeof JoinRoute
+  '/live': typeof LiveRoute
+  '/my-license': typeof MyLicenseRoute
+  '/payment': typeof PaymentRoute
+  '/price': typeof PriceRoute
+  '/redeem': typeof RedeemRoute
+  '/referral': typeof ReferralRoute
+  '/terms': typeof TermsRoute
   '/position/$id': typeof PositionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/a': typeof ARoute
   '/admin': typeof AdminRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/join': typeof JoinRoute
+  '/live': typeof LiveRoute
+  '/my-license': typeof MyLicenseRoute
+  '/payment': typeof PaymentRoute
+  '/price': typeof PriceRoute
+  '/redeem': typeof RedeemRoute
+  '/referral': typeof ReferralRoute
+  '/terms': typeof TermsRoute
   '/position/$id': typeof PositionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/a': typeof ARoute
   '/admin': typeof AdminRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/join': typeof JoinRoute
+  '/live': typeof LiveRoute
+  '/my-license': typeof MyLicenseRoute
+  '/payment': typeof PaymentRoute
+  '/price': typeof PriceRoute
+  '/redeem': typeof RedeemRoute
+  '/referral': typeof ReferralRoute
+  '/terms': typeof TermsRoute
   '/position/$id': typeof PositionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/join' | '/position/$id'
+  fullPaths:
+    | '/'
+    | '/a'
+    | '/admin'
+    | '/how-it-works'
+    | '/join'
+    | '/live'
+    | '/my-license'
+    | '/payment'
+    | '/price'
+    | '/redeem'
+    | '/referral'
+    | '/terms'
+    | '/position/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/join' | '/position/$id'
-  id: '__root__' | '/' | '/admin' | '/join' | '/position/$id'
+  to:
+    | '/'
+    | '/a'
+    | '/admin'
+    | '/how-it-works'
+    | '/join'
+    | '/live'
+    | '/my-license'
+    | '/payment'
+    | '/price'
+    | '/redeem'
+    | '/referral'
+    | '/terms'
+    | '/position/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/a'
+    | '/admin'
+    | '/how-it-works'
+    | '/join'
+    | '/live'
+    | '/my-license'
+    | '/payment'
+    | '/price'
+    | '/redeem'
+    | '/referral'
+    | '/terms'
+    | '/position/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ARoute: typeof ARoute
   AdminRoute: typeof AdminRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   JoinRoute: typeof JoinRoute
+  LiveRoute: typeof LiveRoute
+  MyLicenseRoute: typeof MyLicenseRoute
+  PaymentRoute: typeof PaymentRoute
+  PriceRoute: typeof PriceRoute
+  RedeemRoute: typeof RedeemRoute
+  ReferralRoute: typeof ReferralRoute
+  TermsRoute: typeof TermsRoute
   PositionIdRoute: typeof PositionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/join': {
-      id: '/join'
-      path: '/join'
-      fullPath: '/join'
-      preLoaderRoute: typeof JoinRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/a': {
+      id: '/a'
+      path: '/a'
+      fullPath: '/a'
+      preLoaderRoute: typeof ARouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -85,11 +222,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-license': {
+      id: '/my-license'
+      path: '/my-license'
+      fullPath: '/my-license'
+      preLoaderRoute: typeof MyLicenseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment': {
+      id: '/payment'
+      path: '/payment'
+      fullPath: '/payment'
+      preLoaderRoute: typeof PaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/price': {
+      id: '/price'
+      path: '/price'
+      fullPath: '/price'
+      preLoaderRoute: typeof PriceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redeem': {
+      id: '/redeem'
+      path: '/redeem'
+      fullPath: '/redeem'
+      preLoaderRoute: typeof RedeemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/referral': {
+      id: '/referral'
+      path: '/referral'
+      fullPath: '/referral'
+      preLoaderRoute: typeof ReferralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/position/$id': {
@@ -104,10 +297,29 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ARoute: ARoute,
   AdminRoute: AdminRoute,
+  HowItWorksRoute: HowItWorksRoute,
   JoinRoute: JoinRoute,
+  LiveRoute: LiveRoute,
+  MyLicenseRoute: MyLicenseRoute,
+  PaymentRoute: PaymentRoute,
+  PriceRoute: PriceRoute,
+  RedeemRoute: RedeemRoute,
+  ReferralRoute: ReferralRoute,
+  TermsRoute: TermsRoute,
   PositionIdRoute: PositionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
