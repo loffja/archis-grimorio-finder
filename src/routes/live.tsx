@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useLanguage, type Lang } from "@/lib/i18n";
+import { translateArchmonsterName } from "@/lib/archmonster-names";
+import { handleMonsterImgError } from "@/lib/monster-image";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -84,7 +86,7 @@ const DEMO_POOL: { id: number; name: string }[] = [
   { id: 2418, name: "Bwhork Mageneration, el Precursor" },
   { id: 2430, name: "Cabalista el Conspirador" },
   { id: 2420, name: "Caballagami Pueryukazo, el Aburrido" },
-  { id: 2431, name: "Calawino, el Oriental" },
+  { id: 2431, name: "Saltolante, la Gimnasta" },
   { id: 2327, name: "Cangri-doo, la Hadada" },
   { id: 2419, name: "Cañón Dorzuelo, el Doloroso" },
   { id: 2344, name: "Capioricito Rojo, el Forestal" },
@@ -236,8 +238,8 @@ const DEMO_POOL: { id: number; name: string }[] = [
   { id: 2579, name: "Nieruba, el Poeta" },
   { id: 2540, name: "Nipultay Dea, el Poco Inspirado" },
   { id: 2541, name: "Nozdoku, el Numérico" },
-  { id: 2542, name: "Nujosawa, el Emperador" },
-  { id: 2543, name: "Onicienta, la de Medianoche" },
+  { id: 2542, name: "Arafernalia, la Calígrafa" },
+  { id: 2543, name: "Arakazam, la Psíquica" },
   { id: 4457, name: "Onistérico el Desenfrenado" },
   { id: 2585, name: "Osurce Kodes, el Problemático" },
   { id: 2318, name: "Paelladero Oscuro, el Arrozoso" },
@@ -303,6 +305,8 @@ const DEMO_POOL: { id: number; name: string }[] = [
   { id: 2304, name: "Wogew Wabbit, el Engañado" },
   { id: 2495, name: "Zampatávoro, el Miliano" },
   { id: 2286, name: "Zumburdieu el Social" },
+  { id: 4350, name: "Gargantúa, la Devoradora" },
+  { id: 4352, name: "Dárdamel, la Secuestradora" },
 ];
 
 const DEMO_VISIBLE_COUNT = 8;
@@ -535,10 +539,11 @@ function LiveFeed() {
                     src={demoImageUrl(a.id)}
                     alt=""
                     loading="lazy"
+                    onError={handleMonsterImgError}
                     className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
                   />
                   <span className="flex min-h-[3.2rem] items-center justify-center font-display text-sm font-semibold leading-tight">
-                    {a.name}
+                    {translateArchmonsterName(a.id, a.name, lang)}
                   </span>
                   <span className="mono-label text-[0.65rem] text-muted-foreground">
                     Blair
@@ -573,10 +578,11 @@ function LiveFeed() {
                     src={a.imageUrl}
                     alt={a.name}
                     loading="lazy"
+                    onError={handleMonsterImgError}
                     className="h-20 w-20 rounded-lg object-contain transition-transform group-hover:scale-105"
                   />
                   <span className="flex min-h-[3.2rem] items-center justify-center font-display text-sm font-semibold leading-tight">
-                    {a.name}
+                    {translateArchmonsterName(a.id, a.name, lang)}
                   </span>
                   <span className="mono-label text-[0.65rem] text-muted-foreground">
                     {a.server}

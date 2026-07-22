@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { useLanguage, type Lang } from "@/lib/i18n";
+import { translateArchmonsterName } from "@/lib/archmonster-names";
+import { handleMonsterImgError } from "@/lib/monster-image";
 
 export const Route = createFileRoute("/position/$id")({
   head: () => ({
@@ -131,12 +133,13 @@ function PositionPage() {
               <img
                 src={`https://raw.githubusercontent.com/Gianxaje/kkkal/main/img/${id}.png`}
                 alt={result.name}
+                onError={handleMonsterImgError}
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="mono-label text-primary">{t("position_targetLocated")}</div>
-                <div className="mt-1 font-display text-3xl font-semibold">{result.name}</div>
+                <div className="mt-1 font-display text-3xl font-semibold">{translateArchmonsterName(id, result.name, lang)}</div>
               </div>
             </div>
             <div className="grid grid-cols-2 divide-x divide-border border-t border-border">

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState, useEffect, type ReactNode } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { SystemStatus } from "./SystemStatus";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/lib/i18n";
@@ -28,10 +28,11 @@ function useNavLinks() {
   ] as const;
 }
 
-function NavMenu() {
+// Menú horizontal para escritorio (md+). En móvil se usa MobileNavMenu en su lugar.
+function DesktopNavMenu() {
   const navLinks = useNavLinks();
   return (
-    <nav aria-label="Principal" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+    <nav aria-label="Principal" className="hidden items-center justify-center gap-x-5 gap-y-1 md:flex">
       {navLinks.map((link) => (
         <Link
           key={link.to}
@@ -43,6 +44,72 @@ function NavMenu() {
         </Link>
       ))}
     </nav>
+  );
+}
+
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      {open ? (
+        <path d="M4 4L14 14M14 4L4 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      ) : (
+        <>
+          <path d="M2 5H16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M2 9H16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M2 13H16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+// Botón + panel desplegable con el menú, solo visible en móvil (oculto en md+).
+function MobileNavMenu() {
+  const navLinks = useNavLinks();
+  const [open, setOpen] = useState(false);
+  const routerState = useRouterState();
+
+  // Cierra el menú solo al cambiar de página.
+  useEffect(() => {
+    setOpen(false);
+  }, [routerState.location.pathname]);
+
+  return (
+    <div className="relative md:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-label={open ? "Cerrar menú" : "Abrir menú"}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground transition-colors hover:border-primary/60 hover:text-primary"
+      >
+        <MenuIcon open={open} />
+      </button>
+      {open && (
+        <>
+          <div
+            className="fixed inset-0 z-30 bg-black/40"
+            aria-hidden="true"
+            onClick={() => setOpen(false)}
+          />
+          <nav
+            aria-label="Principal"
+            className="surface-card absolute right-0 top-11 z-40 flex w-48 flex-col gap-1 p-2"
+          >
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="mono-label rounded-lg px-3 py-2.5 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-primary"
+                activeProps={{ className: "text-primary" }}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -70,24 +137,27 @@ export function Layout({
         {t("skipToContent")}
       </a>
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
-      <header className="relative z-10 flex flex-wrap items-center gap-4 px-6 py-3 md:px-10">
+      <header className="relative z-20 flex items-center gap-3 px-4 py-3 md:px-10">
         <Link
           to="/"
-          className="flex items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="flex min-w-0 items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="DakuBot · Inicio"
         >
-          <LogoMark className="h-9 w-9" />
-          <div className="leading-none">
+          <LogoMark className="h-9 w-9 shrink-0" />
+          <div className="min-w-0 leading-none">
             <div className="font-display text-base font-semibold tracking-tight">
               Daku<span className="text-primary">Bot</span>
             </div>
-            <div className="mono-label mt-0.5 text-[0.55rem]">{t("headerTagline")}</div>
+            <div className="mono-label mt-0.5 truncate text-[0.55rem]">{t("headerTagline")}</div>
           </div>
         </Link>
-        <div className="flex flex-1 justify-center">
-          <NavMenu />
+        <div className="hidden flex-1 justify-center md:flex">
+          <DesktopNavMenu />
         </div>
-        <LanguageSwitcher />
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:ml-0">
+          <LanguageSwitcher />
+          <MobileNavMenu />
+        </div>
       </header>
       <main
         id="main-content"

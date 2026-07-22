@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState, useCallback } from "react";
 import { Layout } from "@/components/Layout";
 import { useLanguage } from "@/lib/i18n";
+import { translateArchmonsterName } from "@/lib/archmonster-names";
+import { handleMonsterImgError } from "@/lib/monster-image";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -181,7 +183,7 @@ function AdminPanel({
   onUnauthorized: () => void;
   onLogout: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [licencias, setLicencias] = useState<Licencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -1094,9 +1096,10 @@ function AdminPanel({
                   src={a.imageUrl}
                   alt={a.name}
                   loading="lazy"
+                  onError={handleMonsterImgError}
                   className="h-16 w-16 rounded-lg object-contain"
                 />
-                <span className="font-display text-sm font-semibold leading-tight">{a.name}</span>
+                <span className="font-display text-sm font-semibold leading-tight">{translateArchmonsterName(a.id, a.name, lang)}</span>
                 <span className="mono-label text-[0.65rem] text-muted-foreground">{a.server}</span>
                 <span className="font-mono text-sm text-primary">{a.position}</span>
                 <span className="mono-label text-[0.6rem] text-muted-foreground">
