@@ -192,7 +192,14 @@ export function Layout({
       </main>
       <footer className="relative z-10 border-t border-border/60 py-6 text-center">
         <p className="font-mono text-xs text-muted-foreground">
-          © DakuBot {new Date().getFullYear()} — {t("footerTagline")}{" "}
+          <Link
+            to="/admin"
+            className="no-underline hover:text-foreground"
+            aria-label="Panel"
+          >
+            © DakuBot {new Date().getFullYear()}
+          </Link>{" "}
+          — {t("footerTagline")}{" "}
           <Link to="/terms" className="underline decoration-dotted underline-offset-2 hover:text-primary">
             {t("footerTerms")}
           </Link>
